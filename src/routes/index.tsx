@@ -1,24 +1,71 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
+import {
+  Users, Wallet, FileText, Send, ClipboardList, BarChart3,
+  Upload, Download, Building2, FileDown, Code2, Package,
+} from "lucide-react";
+import { AppShell } from "@/components/AppShell";
+import { useAppState, clientBalance, cashboxBalance, formatCurrency } from "@/lib/store";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
+const cards = [
+  { to: "/clients", label: "إضافة العملاء", icon: Users, tone: "text-primary" },
+  { to: "/cashboxes", label: "إضافة الصناديق", icon: Wallet, tone: "text-primary" },
+  { to: "/vouchers", label: "إضافة سند جديد", icon: FileText, tone: "text-success" },
+  { to: "/transfers", label: "إضافة حوالة جديدة", icon: Send, tone: "text-success" },
+  { to: "/statement", label: "كشف الحساب", icon: ClipboardList, tone: "text-primary" },
+  { to: "/reports", label: "التقارير", icon: BarChart3, tone: "text-primary" },
+  { to: "/backup", label: "النسخ الاحتياطي", icon: Upload, tone: "text-success" },
+  { to: "/backup", label: "الاستعادة", icon: Download, tone: "text-success" },
+  { to: "/company", label: "إعدادات الشركة", icon: Building2, tone: "text-primary" },
+  { to: "/export", label: "تصدير البيانات", icon: FileDown, tone: "text-primary" },
+  { to: "/customize", label: "تعديل وتطوير البرنامج", icon: Code2, tone: "text-success" },
+  { to: "/build-app", label: "إنشاء تطبيق مستقل", icon: Package, tone: "text-success" },
+] as const;
+
 function Index() {
+  const state = useAppState((s) => s);
+  const totalClientsBalance = state.clients.reduce((a, c) => a + clientBalance(state, c.id), 0);
+  const totalCash = state.cashboxes.reduce((a, c) => a + cashboxBalance(state, c.id), 0);
+
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <AppShell>
+      <section className="grid grid-cols-2 gap-3 mb-5">
+        <StatCard label="إجمالي أرصدة العملاء" value={formatCurrency(totalClientsBalance)} />
+        <StatCard label="إجمالي الصناديق" value={formatCurrency(totalCash)} />
+        <StatCard label="عدد العملاء" value={String(state.clients.length)} />
+        <StatCard label="عدد الحوالات" value={String(state.transfers.length)} />
+      </section>
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {cards.map((c) => {
+          const Icon = c.icon;
+          return (
+            <Link
+              key={c.label}
+              to={c.to}
+              className="group bg-card border-2 border-border rounded-2xl p-4 flex flex-col items-center justify-center gap-2 text-center shadow-sm hover:shadow-md hover:border-primary transition-all"
+            >
+              <div className="w-14 h-14 rounded-full bg-accent/40 flex items-center justify-center group-hover:scale-105 transition">
+                <Icon className={`w-7 h-7 ${c.tone}`} />
+              </div>
+              <div className="text-sm font-bold text-card-foreground leading-tight">{c.label}</div>
+            </Link>
+          );
+        })}
+      </div>
+    </AppShell>
+  );
+}
+
+function StatCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="bg-card border border-border rounded-xl p-3 text-center">
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="text-lg font-extrabold text-primary mt-1">{value}</div>
     </div>
   );
 }
