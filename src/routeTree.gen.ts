@@ -9,8 +9,86 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VouchersRouteImport } from './routes/vouchers'
+import { Route as TransfersRouteImport } from './routes/transfers'
+import { Route as StatementRouteImport } from './routes/statement'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as ExportRouteImport } from './routes/export'
+import { Route as CustomizeRouteImport } from './routes/customize'
+import { Route as CompanyRouteImport } from './routes/company'
+import { Route as ClientsRouteImport } from './routes/clients'
+import { Route as CashboxesRouteImport } from './routes/cashboxes'
+import { Route as BuildAppRouteImport } from './routes/build-app'
+import { Route as BackupRouteImport } from './routes/backup'
 import { Route as IndexRouteImport } from './routes/index'
 
+const VouchersRoute = VouchersRouteImport.update({
+  id: '/vouchers',
+  path: '/vouchers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TransfersRoute = TransfersRouteImport.update({
+  id: '/transfers',
+  path: '/transfers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StatementRoute = StatementRouteImport.update({
+  id: '/statement',
+  path: '/statement',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExportRoute = ExportRouteImport.update({
+  id: '/export',
+  path: '/export',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomizeRoute = CustomizeRouteImport.update({
+  id: '/customize',
+  path: '/customize',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompanyRoute = CompanyRouteImport.update({
+  id: '/company',
+  path: '/company',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientsRoute = ClientsRouteImport.update({
+  id: '/clients',
+  path: '/clients',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CashboxesRoute = CashboxesRouteImport.update({
+  id: '/cashboxes',
+  path: '/cashboxes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BuildAppRoute = BuildAppRouteImport.update({
+  id: '/build-app',
+  path: '/build-app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BackupRoute = BackupRouteImport.update({
+  id: '/backup',
+  path: '/backup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +97,214 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/backup': typeof BackupRoute
+  '/build-app': typeof BuildAppRoute
+  '/cashboxes': typeof CashboxesRoute
+  '/clients': typeof ClientsRoute
+  '/company': typeof CompanyRoute
+  '/customize': typeof CustomizeRoute
+  '/export': typeof ExportRoute
+  '/reports': typeof ReportsRoute
+  '/settings': typeof SettingsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/statement': typeof StatementRoute
+  '/transfers': typeof TransfersRoute
+  '/vouchers': typeof VouchersRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/backup': typeof BackupRoute
+  '/build-app': typeof BuildAppRoute
+  '/cashboxes': typeof CashboxesRoute
+  '/clients': typeof ClientsRoute
+  '/company': typeof CompanyRoute
+  '/customize': typeof CustomizeRoute
+  '/export': typeof ExportRoute
+  '/reports': typeof ReportsRoute
+  '/settings': typeof SettingsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/statement': typeof StatementRoute
+  '/transfers': typeof TransfersRoute
+  '/vouchers': typeof VouchersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/backup': typeof BackupRoute
+  '/build-app': typeof BuildAppRoute
+  '/cashboxes': typeof CashboxesRoute
+  '/clients': typeof ClientsRoute
+  '/company': typeof CompanyRoute
+  '/customize': typeof CustomizeRoute
+  '/export': typeof ExportRoute
+  '/reports': typeof ReportsRoute
+  '/settings': typeof SettingsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/statement': typeof StatementRoute
+  '/transfers': typeof TransfersRoute
+  '/vouchers': typeof VouchersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/backup'
+    | '/build-app'
+    | '/cashboxes'
+    | '/clients'
+    | '/company'
+    | '/customize'
+    | '/export'
+    | '/reports'
+    | '/settings'
+    | '/sitemap.xml'
+    | '/statement'
+    | '/transfers'
+    | '/vouchers'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/backup'
+    | '/build-app'
+    | '/cashboxes'
+    | '/clients'
+    | '/company'
+    | '/customize'
+    | '/export'
+    | '/reports'
+    | '/settings'
+    | '/sitemap.xml'
+    | '/statement'
+    | '/transfers'
+    | '/vouchers'
+  id:
+    | '__root__'
+    | '/'
+    | '/backup'
+    | '/build-app'
+    | '/cashboxes'
+    | '/clients'
+    | '/company'
+    | '/customize'
+    | '/export'
+    | '/reports'
+    | '/settings'
+    | '/sitemap.xml'
+    | '/statement'
+    | '/transfers'
+    | '/vouchers'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BackupRoute: typeof BackupRoute
+  BuildAppRoute: typeof BuildAppRoute
+  CashboxesRoute: typeof CashboxesRoute
+  ClientsRoute: typeof ClientsRoute
+  CompanyRoute: typeof CompanyRoute
+  CustomizeRoute: typeof CustomizeRoute
+  ExportRoute: typeof ExportRoute
+  ReportsRoute: typeof ReportsRoute
+  SettingsRoute: typeof SettingsRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  StatementRoute: typeof StatementRoute
+  TransfersRoute: typeof TransfersRoute
+  VouchersRoute: typeof VouchersRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/vouchers': {
+      id: '/vouchers'
+      path: '/vouchers'
+      fullPath: '/vouchers'
+      preLoaderRoute: typeof VouchersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/transfers': {
+      id: '/transfers'
+      path: '/transfers'
+      fullPath: '/transfers'
+      preLoaderRoute: typeof TransfersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/statement': {
+      id: '/statement'
+      path: '/statement'
+      fullPath: '/statement'
+      preLoaderRoute: typeof StatementRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/export': {
+      id: '/export'
+      path: '/export'
+      fullPath: '/export'
+      preLoaderRoute: typeof ExportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customize': {
+      id: '/customize'
+      path: '/customize'
+      fullPath: '/customize'
+      preLoaderRoute: typeof CustomizeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/company': {
+      id: '/company'
+      path: '/company'
+      fullPath: '/company'
+      preLoaderRoute: typeof CompanyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clients': {
+      id: '/clients'
+      path: '/clients'
+      fullPath: '/clients'
+      preLoaderRoute: typeof ClientsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cashboxes': {
+      id: '/cashboxes'
+      path: '/cashboxes'
+      fullPath: '/cashboxes'
+      preLoaderRoute: typeof CashboxesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/build-app': {
+      id: '/build-app'
+      path: '/build-app'
+      fullPath: '/build-app'
+      preLoaderRoute: typeof BuildAppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/backup': {
+      id: '/backup'
+      path: '/backup'
+      fullPath: '/backup'
+      preLoaderRoute: typeof BackupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,6 +317,19 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BackupRoute: BackupRoute,
+  BuildAppRoute: BuildAppRoute,
+  CashboxesRoute: CashboxesRoute,
+  ClientsRoute: ClientsRoute,
+  CompanyRoute: CompanyRoute,
+  CustomizeRoute: CustomizeRoute,
+  ExportRoute: ExportRoute,
+  ReportsRoute: ReportsRoute,
+  SettingsRoute: SettingsRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
+  StatementRoute: StatementRoute,
+  TransfersRoute: TransfersRoute,
+  VouchersRoute: VouchersRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
