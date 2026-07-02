@@ -40,8 +40,12 @@ export function AppShell({ children }: { children: ReactNode }) {
             <h1 className="text-lg font-extrabold tracking-tight">نظام المحاسب المطور</h1>
             <p className="text-[11px] opacity-80">إعداد وتطوير: أسامة الجبلي • الإصدار 1.0</p>
           </div>
-          <div className="w-10 h-10 rounded-lg bg-brand-dark text-primary flex items-center justify-center font-bold">
-            $
+          <div className="w-10 h-10 rounded-lg bg-brand-dark text-primary flex items-center justify-center font-bold overflow-hidden">
+            {company.logo ? (
+              <img src={company.logo} alt="شعار" className="w-full h-full object-contain bg-white" />
+            ) : (
+              <span>$</span>
+            )}
           </div>
         </div>
         <div className="bg-destructive text-destructive-foreground text-center text-xs py-1.5 font-semibold">
@@ -65,8 +69,12 @@ export function AppShell({ children }: { children: ReactNode }) {
               >
                 <X className="w-5 h-5" />
               </button>
-              <div className="w-16 h-16 rounded-full bg-primary mx-auto flex items-center justify-center text-2xl font-black text-primary-foreground">
-                $
+              <div className="w-16 h-16 rounded-full bg-primary mx-auto flex items-center justify-center text-2xl font-black text-primary-foreground overflow-hidden">
+                {company.logo ? (
+                  <img src={company.logo} alt="شعار" className="w-full h-full object-contain bg-white" />
+                ) : (
+                  <span>$</span>
+                )}
               </div>
               <div className="mt-3 font-bold">نظام المحاسب المطور</div>
               <div className="text-xs opacity-70">أسامة الجبلي</div>
