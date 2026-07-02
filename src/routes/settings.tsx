@@ -37,7 +37,7 @@ function SettingsPage() {
           </div>
           <Button variant="destructive" onClick={() => {
             if (!confirm("مسح كل البيانات؟")) return;
-            setState(() => ({ clients: [], cashboxes: [{ id: "main", name: "الصندوق الرئيسي", type: "main", openingBalance: 0 }], vouchers: [], transfers: [], company: { name: "شركتي" } }));
+            setState(() => ({ clients: [], cashboxes: [{ id: "main", name: "الصندوق الرئيسي", type: "main", openingBalance: 0, currency: "YER" }], vouchers: [], transfers: [], company: { name: "شركتي" } }));
             toast.success("تم مسح البيانات");
           }}>
             <Trash2 className="w-4 h-4 ml-1" /> مسح

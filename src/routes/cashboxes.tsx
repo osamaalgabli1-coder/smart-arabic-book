@@ -8,20 +8,20 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Wallet, Trash2 } from "lucide-react";
-import { setState, useAppState, uid, cashboxBalance, formatCurrency, type Cashbox } from "@/lib/store";
+import { setState, useAppState, uid, cashboxBalance, formatCurrency, CURRENCIES, currencyLabels, currencySymbols, type Cashbox, type Currency } from "@/lib/store";
 
 export const Route = createFileRoute("/cashboxes")({ component: CashboxesPage });
 
 function CashboxesPage() {
   const state = useAppState((s) => s);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState<Cashbox>({ id: "", name: "", type: "main", openingBalance: 0 });
+  const [form, setForm] = useState<Cashbox>({ id: "", name: "", type: "main", openingBalance: 0, currency: "YER" });
   const mains = state.cashboxes.filter((c) => c.type === "main");
 
   return (
     <AppShell>
       <PageHeader title="إدارة الصناديق" subtitle="صناديق رئيسية وفرعية بلا حدود" actions={
-        <Button onClick={() => { setForm({ id: "", name: "", type: "main", openingBalance: 0 }); setOpen(true); }}>
+        <Button onClick={() => { setForm({ id: "", name: "", type: "main", openingBalance: 0, currency: "YER" }); setOpen(true); }}>
           <Plus className="w-4 h-4 ml-1" /> صندوق جديد
         </Button>
       } />
@@ -36,9 +36,12 @@ function CashboxesPage() {
               </div>
               <div className="flex-1">
                 <div className="font-bold">{c.name}</div>
-                <div className="text-xs text-muted-foreground">{c.type === "main" ? "صندوق رئيسي" : "صندوق فرعي"}</div>
+                <div className="text-xs text-muted-foreground flex items-center gap-2">
+                  <span>{c.type === "main" ? "صندوق رئيسي" : "صندوق فرعي"}</span>
+                  <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold">{currencyLabels[c.currency]} ({currencySymbols[c.currency]})</span>
+                </div>
               </div>
-              <div className={`text-lg font-extrabold ${bal >= 0 ? "text-success" : "text-destructive"}`}>{formatCurrency(bal)}</div>
+              <div className={`text-lg font-extrabold ${bal >= 0 ? "text-success" : "text-destructive"}`}>{formatCurrency(bal, c.currency)}</div>
               {c.id !== "main" && (
                 <Button size="icon" variant="ghost" onClick={() => {
                   if (!confirm("حذف الصندوق؟")) return;
@@ -55,6 +58,14 @@ function CashboxesPage() {
           <DialogHeader><DialogTitle>صندوق جديد</DialogTitle></DialogHeader>
           <div className="grid gap-3">
             <div className="grid gap-1.5"><Label>الاسم</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
+            <div className="grid gap-1.5"><Label>عملة الصندوق *</Label>
+              <Select value={form.currency} onValueChange={(v) => setForm({ ...form, currency: v as Currency })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {CURRENCIES.map((c) => <SelectItem key={c} value={c}>{currencyLabels[c]} ({currencySymbols[c]})</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="grid gap-1.5"><Label>النوع</Label>
               <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v as "main" | "sub" })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
