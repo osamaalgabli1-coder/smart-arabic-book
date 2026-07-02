@@ -8,13 +8,13 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash2, Send } from "lucide-react";
-import { setState, useAppState, uid, formatCurrency, type Transfer } from "@/lib/store";
+import { setState, useAppState, uid, formatCurrency, CURRENCIES, currencyLabels, currencySymbols, type Transfer, type Currency } from "@/lib/store";
 
 export const Route = createFileRoute("/transfers")({ component: TransfersPage });
 
 const empty = (): Transfer => ({
   id: "", number: "", sender: "", receiver: "", transferType: "صادرة",
-  amount: 0, outgoingFee: 0, incomingFee: 0,
+  amount: 0, currency: "YER", outgoingFee: 0, incomingFee: 0,
   date: new Date().toISOString().slice(0, 10), status: "pending",
 });
 
@@ -45,13 +45,14 @@ function TransfersPage() {
                 <span className="font-bold">#{t.number}</span>
                 <span className="text-xs bg-accent/50 px-2 py-0.5 rounded-full">{t.transferType}</span>
               </div>
-              <div className="text-lg font-extrabold text-primary">{formatCurrency(t.amount)}</div>
+              <div className="text-lg font-extrabold text-primary">{formatCurrency(t.amount, t.currency)}</div>
             </div>
             <div className="grid grid-cols-2 gap-2 mt-2 text-xs text-muted-foreground">
               <div>المرسل: <span className="text-foreground font-semibold">{t.sender}</span></div>
               <div>المستلم: <span className="text-foreground font-semibold">{t.receiver}</span></div>
-              <div>عمولة صادرة: {formatCurrency(t.outgoingFee || 0)}</div>
-              <div>عمولة واردة: {formatCurrency(t.incomingFee || 0)}</div>
+              <div>عمولة صادرة: {formatCurrency(t.outgoingFee || 0, t.currency)}</div>
+              <div>عمولة واردة: {formatCurrency(t.incomingFee || 0, t.currency)}</div>
+              <div>العملة: <span className="text-foreground font-semibold">{currencyLabels[t.currency]}</span></div>
               <div>التاريخ: {t.date}</div>
               <div>الحالة: <span className="font-semibold">{statusLabels[t.status]}</span></div>
             </div>
@@ -80,6 +81,12 @@ function TransfersPage() {
                   <SelectItem value="واردة">واردة</SelectItem>
                   <SelectItem value="داخلية">داخلية</SelectItem>
                 </SelectContent>
+              </Select>
+            </F>
+            <F label="العملة">
+              <Select value={form.currency} onValueChange={(v) => setForm({ ...form, currency: v as Currency })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>{CURRENCIES.map((c) => <SelectItem key={c} value={c}>{currencyLabels[c]} ({currencySymbols[c]})</SelectItem>)}</SelectContent>
               </Select>
             </F>
             <F label="المبلغ"><Input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: Number(e.target.value) || 0 })} /></F>

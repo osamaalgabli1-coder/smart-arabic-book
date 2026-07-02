@@ -5,7 +5,7 @@ import {
   Upload, Download, Building2, FileDown, Code2, Package,
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
-import { useAppState, clientBalance, cashboxBalance, formatCurrency } from "@/lib/store";
+import { useAppState, formatCurrency, sumCashboxesByCurrency, sumClientsByCurrency, CURRENCIES, currencySymbols } from "@/lib/store";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -28,16 +28,28 @@ const cards = [
 
 function Index() {
   const state = useAppState((s) => s);
-  const totalClientsBalance = state.clients.reduce((a, c) => a + clientBalance(state, c.id), 0);
-  const totalCash = state.cashboxes.reduce((a, c) => a + cashboxBalance(state, c.id), 0);
+  const clientTotals = sumClientsByCurrency(state);
+  const cashTotals = sumCashboxesByCurrency(state);
 
   return (
     <AppShell>
-      <section className="grid grid-cols-2 gap-3 mb-5">
-        <StatCard label="إجمالي أرصدة العملاء" value={formatCurrency(totalClientsBalance)} />
-        <StatCard label="إجمالي الصناديق" value={formatCurrency(totalCash)} />
+      <section className="grid grid-cols-2 gap-3 mb-4">
         <StatCard label="عدد العملاء" value={String(state.clients.length)} />
         <StatCard label="عدد الحوالات" value={String(state.transfers.length)} />
+      </section>
+      <section className="mb-5">
+        <h3 className="text-xs font-bold text-muted-foreground mb-2">أرصدة الصناديق حسب العملة</h3>
+        <div className="grid grid-cols-3 gap-2 mb-3">
+          {CURRENCIES.map((c) => (
+            <StatCard key={c} label={currencySymbols[c]} value={formatCurrency(cashTotals[c], c)} />
+          ))}
+        </div>
+        <h3 className="text-xs font-bold text-muted-foreground mb-2">أرصدة العملاء حسب العملة</h3>
+        <div className="grid grid-cols-3 gap-2">
+          {CURRENCIES.map((c) => (
+            <StatCard key={c} label={currencySymbols[c]} value={formatCurrency(clientTotals[c], c)} />
+          ))}
+        </div>
       </section>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">

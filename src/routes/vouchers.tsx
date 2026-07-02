@@ -9,14 +9,14 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash2 } from "lucide-react";
-import { setState, useAppState, uid, formatCurrency, voucherTypeLabels, type Voucher, type VoucherType } from "@/lib/store";
+import { setState, useAppState, uid, formatCurrency, voucherTypeLabels, currencyLabels, currencySymbols, CURRENCIES, type Voucher, type VoucherType, type Currency } from "@/lib/store";
 
 export const Route = createFileRoute("/vouchers")({ component: VouchersPage });
 
 const emptyForm = (): Voucher => ({
   id: "", date: new Date().toISOString().slice(0, 10),
   clientId: "", cashboxId: "main", toCashboxId: "",
-  description: "", amount: 0, type: "receipt",
+  description: "", amount: 0, type: "receipt", currency: "YER",
 });
 
 function VouchersPage() {
@@ -27,6 +27,12 @@ function VouchersPage() {
   const needsClient = ["credit", "debit", "receipt", "payment", "adjustment"].includes(form.type);
   const needsCashbox = ["receipt", "payment", "transfer"].includes(form.type);
   const needsToCashbox = form.type === "transfer";
+
+  const srcBox = state.cashboxes.find((c) => c.id === form.cashboxId);
+  const dstBox = state.cashboxes.find((c) => c.id === form.toCashboxId);
+  const isCrossCurrency = needsToCashbox && srcBox && dstBox && srcBox.currency !== dstBox.currency;
+  // For non-transfer vouchers, the currency follows the cashbox if picked; else user selects.
+  const effectiveCurrency: Currency = needsCashbox && srcBox ? srcBox.currency : form.currency;
 
   return (
     <AppShell>
@@ -54,7 +60,12 @@ function VouchersPage() {
                   {cash?.name && <>الصندوق: {cash.name}</>}
                 </div>
               </div>
-              <div className="text-lg font-extrabold text-primary">{formatCurrency(v.amount)}</div>
+              <div className="text-lg font-extrabold text-primary text-left">
+                {formatCurrency(v.amount, v.currency)}
+                {v.type === "transfer" && v.toAmount != null && v.toAmount !== v.amount && (
+                  <div className="text-[10px] font-normal text-muted-foreground">← {formatCurrency(v.toAmount, state.cashboxes.find((c) => c.id === v.toCashboxId)?.currency ?? v.currency)}</div>
+                )}
+              </div>
               <Button size="icon" variant="ghost" onClick={() => {
                 if (!confirm("حذف السند؟")) return;
                 setState((s) => ({ ...s, vouchers: s.vouchers.filter((x) => x.id !== v.id) }));
@@ -90,7 +101,7 @@ function VouchersPage() {
               <div className="grid gap-1.5"><Label>{needsToCashbox ? "من صندوق" : "الصندوق"}</Label>
                 <Select value={form.cashboxId} onValueChange={(v) => setForm({ ...form, cashboxId: v })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{state.cashboxes.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
+                  <SelectContent>{state.cashboxes.map((c) => <SelectItem key={c.id} value={c.id}>{c.name} — {currencySymbols[c.currency]}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
             )}
@@ -98,15 +109,43 @@ function VouchersPage() {
               <div className="grid gap-1.5"><Label>إلى صندوق</Label>
                 <Select value={form.toCashboxId} onValueChange={(v) => setForm({ ...form, toCashboxId: v })}>
                   <SelectTrigger><SelectValue placeholder="اختر" /></SelectTrigger>
-                  <SelectContent>{state.cashboxes.filter((c) => c.id !== form.cashboxId).map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
+                  <SelectContent>{state.cashboxes.filter((c) => c.id !== form.cashboxId).map((c) => <SelectItem key={c.id} value={c.id}>{c.name} — {currencySymbols[c.currency]}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
             )}
-            <div className="grid gap-1.5"><Label>المبلغ</Label><Input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: Number(e.target.value) || 0 })} /></div>
+            {!needsCashbox && (
+              <div className="grid gap-1.5"><Label>العملة</Label>
+                <Select value={form.currency} onValueChange={(v) => setForm({ ...form, currency: v as Currency })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>{CURRENCIES.map((c) => <SelectItem key={c} value={c}>{currencyLabels[c]} ({currencySymbols[c]})</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+            )}
+            <div className="grid gap-1.5">
+              <Label>المبلغ {needsCashbox && srcBox ? `(${currencySymbols[srcBox.currency]})` : `(${currencySymbols[effectiveCurrency]})`}</Label>
+              <Input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: Number(e.target.value) || 0 })} />
+            </div>
+            {isCrossCurrency && srcBox && dstBox && (
+              <div className="grid grid-cols-2 gap-3 p-3 bg-accent/30 rounded-lg border border-border">
+                <div className="grid gap-1.5"><Label className="text-xs">سعر الصرف</Label>
+                  <Input type="number" step="0.0001" value={form.exchangeRate ?? ""} placeholder={`1 ${currencySymbols[srcBox.currency]} = ? ${currencySymbols[dstBox.currency]}`}
+                    onChange={(e) => {
+                      const rate = Number(e.target.value) || 0;
+                      setForm({ ...form, exchangeRate: rate, toAmount: rate > 0 ? Number((form.amount * rate).toFixed(2)) : form.toAmount });
+                    }} />
+                </div>
+                <div className="grid gap-1.5"><Label className="text-xs">المبلغ المستلم ({currencySymbols[dstBox.currency]})</Label>
+                  <Input type="number" value={form.toAmount ?? ""} onChange={(e) => setForm({ ...form, toAmount: Number(e.target.value) || 0 })} />
+                </div>
+                <div className="col-span-2 text-[11px] text-muted-foreground">تحويل من عملة إلى أخرى — أدخل سعر الصرف أو المبلغ المستلم يدوياً.</div>
+              </div>
+            )}
             <div className="grid gap-1.5"><Label>البيان</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
             <Button onClick={() => {
               if (form.amount <= 0) return;
-              setState((s) => ({ ...s, vouchers: [...s.vouchers, { ...form, id: uid() }] }));
+              const finalCurrency: Currency = needsCashbox && srcBox ? srcBox.currency : form.currency;
+              const finalToAmount = form.type === "transfer" && isCrossCurrency ? (form.toAmount || form.amount) : (form.type === "transfer" ? form.amount : undefined);
+              setState((s) => ({ ...s, vouchers: [...s.vouchers, { ...form, id: uid(), currency: finalCurrency, toAmount: finalToAmount }] }));
               setOpen(false);
             }}>حفظ السند</Button>
           </div>
