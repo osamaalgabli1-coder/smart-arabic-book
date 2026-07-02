@@ -1,5 +1,18 @@
 import { useSyncExternalStore } from "react";
 
+export type Currency = "YER" | "SAR" | "USD";
+export const CURRENCIES: Currency[] = ["YER", "SAR", "USD"];
+export const currencyLabels: Record<Currency, string> = {
+  YER: "ريال يمني",
+  SAR: "ريال سعودي",
+  USD: "دولار أمريكي",
+};
+export const currencySymbols: Record<Currency, string> = {
+  YER: "﷼",
+  SAR: "ر.س",
+  USD: "$",
+};
+
 export type Client = {
   id: string;
   name: string;
@@ -7,6 +20,7 @@ export type Client = {
   address?: string;
   notes?: string;
   openingBalance: number;
+  openingCurrency?: Currency;
   photo?: string;
 };
 
@@ -16,6 +30,7 @@ export type Cashbox = {
   type: "main" | "sub";
   parentId?: string;
   openingBalance: number;
+  currency: Currency;
 };
 
 export type VoucherType =
@@ -34,6 +49,9 @@ export type Voucher = {
   toCashboxId?: string;
   description: string;
   amount: number;
+  toAmount?: number; // للتحويل بين عملتين مختلفتين (المبلغ المستلم)
+  exchangeRate?: number;
+  currency: Currency;
   type: VoucherType;
 };
 
@@ -44,6 +62,7 @@ export type Transfer = {
   receiver: string;
   transferType: string;
   amount: number;
+  currency: Currency;
   outgoingFee?: number;
   incomingFee?: number;
   date: string;
@@ -71,7 +90,7 @@ const KEY = "muhaseb-app-state-v1";
 
 const initialState: AppState = {
   clients: [],
-  cashboxes: [{ id: "main", name: "الصندوق الرئيسي", type: "main", openingBalance: 0 }],
+  cashboxes: [{ id: "main", name: "الصندوق الرئيسي", type: "main", openingBalance: 0, currency: "YER" }],
   vouchers: [],
   transfers: [],
   company: { name: "شركتي" },
@@ -85,7 +104,12 @@ function load(): AppState {
   try {
     const raw = window.localStorage.getItem(KEY);
     if (!raw) return initialState;
-    return { ...initialState, ...JSON.parse(raw) };
+    const parsed = { ...initialState, ...JSON.parse(raw) };
+    // migration: ensure currency on cashboxes / vouchers / transfers
+    parsed.cashboxes = (parsed.cashboxes ?? []).map((c: Cashbox) => ({ ...c, currency: c.currency ?? "YER" }));
+    parsed.vouchers = (parsed.vouchers ?? []).map((v: Voucher) => ({ ...v, currency: v.currency ?? "YER" }));
+    parsed.transfers = (parsed.transfers ?? []).map((t: Transfer) => ({ ...t, currency: t.currency ?? "YER" }));
+    return parsed;
   } catch {
     return initialState;
   }
@@ -127,17 +151,25 @@ export function uid() {
 
 // ------- domain helpers -------
 
-export function clientBalance(state: AppState, clientId: string): number {
+export function clientBalances(state: AppState, clientId: string): Record<Currency, number> {
   const c = state.clients.find((x) => x.id === clientId);
-  if (!c) return 0;
-  let bal = c.openingBalance;
+  const out: Record<Currency, number> = { YER: 0, SAR: 0, USD: 0 };
+  if (!c) return out;
+  out[c.openingCurrency ?? "YER"] += c.openingBalance || 0;
   for (const v of state.vouchers) {
     if (v.clientId !== clientId) continue;
-    if (v.type === "credit" || v.type === "payment") bal += v.amount;
-    if (v.type === "debit" || v.type === "receipt") bal -= v.amount;
-    if (v.type === "adjustment") bal += v.amount;
+    const cur: Currency = v.currency ?? "YER";
+    if (v.type === "credit" || v.type === "payment") out[cur] += v.amount;
+    else if (v.type === "debit" || v.type === "receipt") out[cur] -= v.amount;
+    else if (v.type === "adjustment") out[cur] += v.amount;
   }
-  return bal;
+  return out;
+}
+
+// رصيد إجمالي (يجمع كل العملات دون تحويل) — للإحصاءات السريعة فقط
+export function clientBalance(state: AppState, clientId: string): number {
+  const b = clientBalances(state, clientId);
+  return b.YER + b.SAR + b.USD;
 }
 
 export function cashboxBalance(state: AppState, cashboxId: string): number {
@@ -149,14 +181,33 @@ export function cashboxBalance(state: AppState, cashboxId: string): number {
     if (v.type === "payment" && v.cashboxId === cashboxId) bal -= v.amount;
     if (v.type === "transfer") {
       if (v.cashboxId === cashboxId) bal -= v.amount;
-      if (v.toCashboxId === cashboxId) bal += v.amount;
+      if (v.toCashboxId === cashboxId) bal += (v.toAmount ?? v.amount);
     }
   }
   return bal;
 }
 
-export function formatCurrency(n: number): string {
+export function formatNumber(n: number): string {
   return new Intl.NumberFormat("ar", { maximumFractionDigits: 2 }).format(n);
+}
+
+export function formatCurrency(n: number, currency: Currency = "YER"): string {
+  return `${formatNumber(n)} ${currencySymbols[currency]}`;
+}
+
+export function sumCashboxesByCurrency(state: AppState): Record<Currency, number> {
+  const out: Record<Currency, number> = { YER: 0, SAR: 0, USD: 0 };
+  for (const c of state.cashboxes) out[c.currency] += cashboxBalance(state, c.id);
+  return out;
+}
+
+export function sumClientsByCurrency(state: AppState): Record<Currency, number> {
+  const out: Record<Currency, number> = { YER: 0, SAR: 0, USD: 0 };
+  for (const c of state.clients) {
+    const b = clientBalances(state, c.id);
+    out.YER += b.YER; out.SAR += b.SAR; out.USD += b.USD;
+  }
+  return out;
 }
 
 export const voucherTypeLabels: Record<VoucherType, string> = {
