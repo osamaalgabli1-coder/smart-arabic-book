@@ -1,39 +1,56 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
-import { useAppState, clientBalance, cashboxBalance, formatCurrency } from "@/lib/store";
+import { useAppState, clientBalances, cashboxBalance, formatCurrency, sumCashboxesByCurrency, sumClientsByCurrency, CURRENCIES, currencyLabels, currencySymbols } from "@/lib/store";
 
 export const Route = createFileRoute("/reports")({ component: ReportsPage });
 
 function ReportsPage() {
   const state = useAppState((s) => s);
-  const totalClients = state.clients.reduce((a, c) => a + clientBalance(state, c.id), 0);
-  const totalCash = state.cashboxes.reduce((a, c) => a + cashboxBalance(state, c.id), 0);
-  const totalTransfers = state.transfers.reduce((a, t) => a + t.amount, 0);
-  const commissionProfit = state.transfers.reduce((a, t) => a + (t.outgoingFee || 0) + (t.incomingFee || 0), 0);
+  const clientTotals = sumClientsByCurrency(state);
+  const cashTotals = sumCashboxesByCurrency(state);
+  const transferTotals: Record<"YER"|"SAR"|"USD", number> = { YER: 0, SAR: 0, USD: 0 };
+  const commissionTotals: Record<"YER"|"SAR"|"USD", number> = { YER: 0, SAR: 0, USD: 0 };
+  for (const t of state.transfers) {
+    transferTotals[t.currency] += t.amount;
+    commissionTotals[t.currency] += (t.outgoingFee || 0) + (t.incomingFee || 0);
+  }
 
   return (
     <AppShell>
-      <PageHeader title="التقارير" subtitle="ملخص شامل لجميع بيانات النظام" />
+      <PageHeader title="التقارير" subtitle="مفصل حسب العملة: ريال يمني، ريال سعودي، دولار أمريكي" />
       <div className="grid grid-cols-2 gap-3 mb-5">
-        <Kpi k="إجمالي العملاء" v={String(state.clients.length)} />
-        <Kpi k="إجمالي الصناديق" v={String(state.cashboxes.length)} />
-        <Kpi k="إجمالي أرصدة العملاء" v={formatCurrency(totalClients)} />
-        <Kpi k="إجمالي أرصدة الصناديق" v={formatCurrency(totalCash)} />
-        <Kpi k="عدد الحوالات" v={String(state.transfers.length)} />
-        <Kpi k="أرباح العمولات" v={formatCurrency(commissionProfit)} highlight />
+        <Kpi k="عدد العملاء" v={String(state.clients.length)} />
+        <Kpi k="عدد الصناديق" v={String(state.cashboxes.length)} />
         <Kpi k="عدد السندات" v={String(state.vouchers.length)} />
-        <Kpi k="إجمالي مبالغ الحوالات" v={formatCurrency(totalTransfers)} />
+        <Kpi k="عدد الحوالات" v={String(state.transfers.length)} />
       </div>
-      <Section title="تقرير أرصدة العملاء">
-        <Table headers={["العميل", "الهاتف", "الرصيد"]} rows={state.clients.map((c) => [c.name, c.phone ?? "—", formatCurrency(clientBalance(state, c.id))])} />
-      </Section>
-      <Section title="تقرير أرصدة الصناديق">
-        <Table headers={["الصندوق", "النوع", "الرصيد"]} rows={state.cashboxes.map((c) => [c.name, c.type === "main" ? "رئيسي" : "فرعي", formatCurrency(cashboxBalance(state, c.id))])} />
-      </Section>
-      <Section title="تقرير الحوالات">
-        <Table headers={["الرقم", "المرسل", "المستلم", "المبلغ", "التاريخ"]} rows={state.transfers.map((t) => [t.number, t.sender, t.receiver, formatCurrency(t.amount), t.date])} />
-      </Section>
+
+      {CURRENCIES.map((cur) => (
+        <div key={cur} className="mb-6 border-2 border-border rounded-xl overflow-hidden bg-card">
+          <div className="bg-primary/10 text-primary px-4 py-2 font-extrabold flex items-center justify-between">
+            <span>{currencyLabels[cur]} ({currencySymbols[cur]})</span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-3">
+            <Kpi k="أرصدة العملاء" v={formatCurrency(clientTotals[cur], cur)} />
+            <Kpi k="أرصدة الصناديق" v={formatCurrency(cashTotals[cur], cur)} />
+            <Kpi k="مبالغ الحوالات" v={formatCurrency(transferTotals[cur], cur)} />
+            <Kpi k="أرباح العمولات" v={formatCurrency(commissionTotals[cur], cur)} highlight />
+          </div>
+          <Section title="أرصدة العملاء">
+            <Table headers={["العميل", "الهاتف", "الرصيد"]} rows={state.clients
+              .map((c) => ({ c, bal: clientBalances(state, c.id)[cur] }))
+              .filter(({ bal }) => bal !== 0)
+              .map(({ c, bal }) => [c.name, c.phone ?? "—", formatCurrency(bal, cur)])} />
+          </Section>
+          <Section title="أرصدة الصناديق">
+            <Table headers={["الصندوق", "النوع", "الرصيد"]} rows={state.cashboxes.filter((c) => c.currency === cur).map((c) => [c.name, c.type === "main" ? "رئيسي" : "فرعي", formatCurrency(cashboxBalance(state, c.id), cur)])} />
+          </Section>
+          <Section title="الحوالات">
+            <Table headers={["الرقم", "المرسل", "المستلم", "المبلغ", "التاريخ"]} rows={state.transfers.filter((t) => t.currency === cur).map((t) => [t.number, t.sender, t.receiver, formatCurrency(t.amount, cur), t.date])} />
+          </Section>
+        </div>
+      ))}
     </AppShell>
   );
 }
@@ -49,9 +66,9 @@ function Kpi({ k, v, highlight }: { k: string; v: string; highlight?: boolean })
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="mb-5">
-      <h3 className="font-bold text-primary mb-2">{title}</h3>
-      <div className="bg-card border border-border rounded-xl overflow-hidden">{children}</div>
+    <div className="px-3 pb-3">
+      <h3 className="font-bold text-primary mb-2 text-sm">{title}</h3>
+      <div className="bg-background border border-border rounded-xl overflow-hidden">{children}</div>
     </div>
   );
 }
