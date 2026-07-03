@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Phone } from "lucide-react";
+import { Plus, Pencil, Trash2, Phone, Contact } from "lucide-react";
 import { setState, useAppState, uid, clientBalance, formatCurrency, type Client } from "@/lib/store";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/clients")({ component: ClientsPage });
 
@@ -64,18 +65,48 @@ function ClientsPage() {
   );
 }
 
+// Contacts API type (experimental)
+type ContactsManager = { select: (props: string[], opts?: { multiple?: boolean }) => Promise<Array<{ tel?: string[]; name?: string[] }>> };
+
 function ClientDialog({ open, onOpenChange, initial }: { open: boolean; onOpenChange: (v: boolean) => void; initial: Client | null }) {
-  const [form, setForm] = useState<Client>(initial ?? { id: "", name: "", phone: "", address: "", notes: "", openingBalance: 0 });
+  const emptyC: Client = { id: "", name: "", phone: "", address: "", notes: "", openingBalance: 0 };
+  const [form, setForm] = useState<Client>(initial ?? emptyC);
   const key = initial?.id ?? "new";
+
+  const pickContact = async () => {
+    const nav = navigator as unknown as { contacts?: ContactsManager };
+    if (!nav.contacts?.select) {
+      toast.error("جهات الاتصال غير مدعومة على هذا الجهاز — أدخل الرقم يدوياً");
+      return;
+    }
+    try {
+      const [c] = await nav.contacts.select(["name", "tel"], { multiple: false });
+      if (!c) return;
+      const phone = c.tel?.[0] ?? "";
+      const name = c.name?.[0] ?? form.name;
+      setForm((f) => ({ ...f, phone, name: f.name || name }));
+      toast.success("تم اختيار جهة الاتصال");
+    } catch {
+      toast.error("تعذّر الوصول إلى جهات الاتصال");
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (v) setForm(initial ?? { id: "", name: "", phone: "", address: "", notes: "", openingBalance: 0 }); }}>
+    <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (v) setForm(initial ?? emptyC); }}>
       <DialogContent key={key}>
         <DialogHeader><DialogTitle>{initial ? "تعديل عميل" : "عميل جديد"}</DialogTitle></DialogHeader>
         <div className="grid gap-3">
           <F label="اسم العميل"><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></F>
-          <F label="رقم الهاتف"><Input value={form.phone ?? ""} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></F>
+          <F label="رقم الهاتف">
+            <div className="flex gap-2">
+              <Input value={form.phone ?? ""} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="مثال: 771234567" />
+              <Button type="button" variant="outline" size="icon" onClick={pickContact} title="من جهات الاتصال">
+                <Contact className="w-4 h-4" />
+              </Button>
+            </div>
+          </F>
           <F label="العنوان"><Input value={form.address ?? ""} onChange={(e) => setForm({ ...form, address: e.target.value })} /></F>
-          <F label="الرصيد الافتتاحي"><Input type="number" value={form.openingBalance} onChange={(e) => setForm({ ...form, openingBalance: Number(e.target.value) || 0 })} /></F>
+          <F label="الرصيد الافتتاحي"><Input type="number" inputMode="decimal" placeholder="0" value={form.openingBalance || ""} onChange={(e) => setForm({ ...form, openingBalance: Number(e.target.value) || 0 })} /></F>
           <F label="ملاحظات"><Textarea value={form.notes ?? ""} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></F>
           <Button onClick={() => {
             if (!form.name.trim()) return;
