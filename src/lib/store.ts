@@ -39,16 +39,20 @@ export type VoucherType =
   | "receipt" // قبض من العميل إلى الصندوق
   | "payment" // صرف من الصندوق للعميل
   | "transfer" // تحويل بين الصناديق
-  | "adjustment"; // قيد تسوية
+  | "adjustment" // قيد تسوية
+  | "compound"; // قيد بسيط من عميل إلى عميل (+ عمولة اختيارية)
 
 export type Voucher = {
   id: string;
+  number: string;
   date: string;
   clientId?: string;
+  toClientId?: string; // للقيد البسيط: الطرف الدائن
   cashboxId?: string;
   toCashboxId?: string;
   description: string;
   amount: number;
+  commission?: number; // عمولة اختيارية للقيد البسيط
   toAmount?: number; // للتحويل بين عملتين مختلفتين (المبلغ المستلم)
   exchangeRate?: number;
   currency: Currency;
@@ -58,15 +62,17 @@ export type Voucher = {
 export type Transfer = {
   id: string;
   number: string;
+  clientId?: string; // العميل المرتبط بالحوالة
   sender: string;
   receiver: string;
-  transferType: string;
+  transferType: "صادرة" | "واردة" | "داخلية" | string;
   amount: number;
   currency: Currency;
   outgoingFee?: number;
   incomingFee?: number;
   date: string;
   status: "pending" | "completed" | "cancelled";
+  description?: string;
 };
 
 export type Company = {
@@ -78,12 +84,17 @@ export type Company = {
   notes?: string;
 };
 
+export type AppSettings = {
+  whatsappAutoSend: boolean;
+};
+
 export type AppState = {
   clients: Client[];
   cashboxes: Cashbox[];
   vouchers: Voucher[];
   transfers: Transfer[];
   company: Company;
+  settings: AppSettings;
 };
 
 const KEY = "muhaseb-app-state-v1";
@@ -94,6 +105,7 @@ const initialState: AppState = {
   vouchers: [],
   transfers: [],
   company: { name: "شركتي" },
+  settings: { whatsappAutoSend: false },
 };
 
 let state: AppState = load();
@@ -107,8 +119,9 @@ function load(): AppState {
     const parsed = { ...initialState, ...JSON.parse(raw) };
     // migration: ensure currency on cashboxes / vouchers / transfers
     parsed.cashboxes = (parsed.cashboxes ?? []).map((c: Cashbox) => ({ ...c, currency: c.currency ?? "YER" }));
-    parsed.vouchers = (parsed.vouchers ?? []).map((v: Voucher) => ({ ...v, currency: v.currency ?? "YER" }));
+    parsed.vouchers = (parsed.vouchers ?? []).map((v: Voucher, i: number) => ({ ...v, currency: v.currency ?? "YER", number: v.number ?? String(i + 1).padStart(4, "0") }));
     parsed.transfers = (parsed.transfers ?? []).map((t: Transfer) => ({ ...t, currency: t.currency ?? "YER" }));
+    parsed.settings = { ...initialState.settings, ...(parsed.settings ?? {}) };
     return parsed;
   } catch {
     return initialState;
@@ -157,11 +170,21 @@ export function clientBalances(state: AppState, clientId: string): Record<Curren
   if (!c) return out;
   out[c.openingCurrency ?? "YER"] += c.openingBalance || 0;
   for (const v of state.vouchers) {
-    if (v.clientId !== clientId) continue;
     const cur: Currency = v.currency ?? "YER";
-    if (v.type === "credit" || v.type === "payment") out[cur] += v.amount;
-    else if (v.type === "debit" || v.type === "receipt") out[cur] -= v.amount;
-    else if (v.type === "adjustment") out[cur] += v.amount;
+    if (v.type === "compound") {
+      if (v.clientId === clientId) out[cur] -= (v.amount + (v.commission || 0));
+      if (v.toClientId === clientId) out[cur] += v.amount;
+    } else if (v.clientId === clientId) {
+      if (v.type === "credit" || v.type === "payment") out[cur] += v.amount;
+      else if (v.type === "debit" || v.type === "receipt") out[cur] -= v.amount;
+      else if (v.type === "adjustment") out[cur] += v.amount;
+    }
+  }
+  for (const t of state.transfers) {
+    if (t.clientId !== clientId) continue;
+    const cur = t.currency;
+    if (t.transferType === "واردة") out[cur] += t.amount;
+    else if (t.transferType === "صادرة") out[cur] -= t.amount;
   }
   return out;
 }
@@ -211,10 +234,85 @@ export function sumClientsByCurrency(state: AppState): Record<Currency, number> 
 }
 
 export const voucherTypeLabels: Record<VoucherType, string> = {
-  credit: "له",
-  debit: "عليه",
+  credit: "دائن (له)",
+  debit: "مدين (عليه)",
   receipt: "قبض من العميل",
   payment: "صرف للعميل",
   transfer: "تحويل بين الصناديق",
   adjustment: "قيد تسوية",
+  compound: "قيد بسيط (عميل → عميل)",
 };
+
+// ---------- Unified Client Ledger ----------
+export type LedgerEntry = {
+  id: string;
+  number: string;
+  date: string;
+  description: string;
+  typeLabel: string;
+  debit: number; // عليه
+  credit: number; // له
+  currency: Currency;
+};
+
+export function clientLedger(state: AppState, clientId: string): Record<Currency, LedgerEntry[]> {
+  const out: Record<Currency, LedgerEntry[]> = { YER: [], SAR: [], USD: [] };
+  const nameOf = (id?: string) => state.clients.find((c) => c.id === id)?.name ?? "";
+  for (const v of state.vouchers) {
+    const cur: Currency = v.currency ?? "YER";
+    if (v.type === "compound") {
+      if (v.clientId === clientId) {
+        out[cur].push({
+          id: v.id, number: v.number, date: v.date,
+          description: `${v.description || "قيد بسيط"} — إلى: ${nameOf(v.toClientId)}${v.commission ? ` (عمولة ${v.commission})` : ""}`,
+          typeLabel: "قيد بسيط (مدين)",
+          debit: v.amount + (v.commission || 0), credit: 0, currency: cur,
+        });
+      }
+      if (v.toClientId === clientId) {
+        out[cur].push({
+          id: v.id + "-to", number: v.number, date: v.date,
+          description: `${v.description || "قيد بسيط"} — من: ${nameOf(v.clientId)}`,
+          typeLabel: "قيد بسيط (دائن)",
+          debit: 0, credit: v.amount, currency: cur,
+        });
+      }
+      continue;
+    }
+    if (v.clientId !== clientId) continue;
+    let debit = 0, credit = 0, label = voucherTypeLabels[v.type];
+    if (v.type === "credit") credit = v.amount;
+    else if (v.type === "debit") debit = v.amount;
+    else if (v.type === "receipt") debit = v.amount;
+    else if (v.type === "payment") credit = v.amount;
+    else if (v.type === "adjustment") credit = v.amount;
+    else continue;
+    out[cur].push({ id: v.id, number: v.number, date: v.date, description: v.description || label, typeLabel: label, debit, credit, currency: cur });
+  }
+  for (const t of state.transfers) {
+    if (t.clientId !== clientId) continue;
+    const cur = t.currency;
+    const isOut = t.transferType === "صادرة";
+    out[cur].push({
+      id: t.id, number: t.number, date: t.date,
+      description: `${isOut ? "حوالة صادرة" : "حوالة واردة"} #${t.number} — ${isOut ? `إلى ${t.receiver}` : `من ${t.sender}`}${t.description ? " · " + t.description : ""}`,
+      typeLabel: isOut ? "حوالة صادرة (مدين)" : "حوالة واردة (دائن)",
+      debit: isOut ? t.amount : 0, credit: isOut ? 0 : t.amount, currency: cur,
+    });
+  }
+  for (const cur of CURRENCIES) out[cur].sort((a, b) => a.date.localeCompare(b.date) || a.number.localeCompare(b.number));
+  return out;
+}
+
+export function nextVoucherNumber(state: AppState): string {
+  const max = state.vouchers.reduce((m, v) => Math.max(m, Number(v.number) || 0), 0);
+  return String(max + 1).padStart(4, "0");
+}
+
+export function nextTransferNumber(state: AppState): string {
+  const max = state.transfers.reduce((m, t) => {
+    const n = Number(String(t.number).replace(/\D/g, "")) || 0;
+    return Math.max(m, n);
+  }, 0);
+  return `HW-${String(max + 1).padStart(4, "0")}`;
+}

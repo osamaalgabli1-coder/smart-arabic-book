@@ -83,7 +83,7 @@ function CashboxesPage() {
                 </Select>
               </div>
             )}
-            <div className="grid gap-1.5"><Label>الرصيد الافتتاحي</Label><Input type="number" value={form.openingBalance} onChange={(e) => setForm({ ...form, openingBalance: Number(e.target.value) || 0 })} /></div>
+            <div className="grid gap-1.5"><Label>الرصيد الافتتاحي</Label><Input type="number" inputMode="decimal" placeholder="0" value={form.openingBalance || ""} onChange={(e) => setForm({ ...form, openingBalance: Number(e.target.value) || 0 })} /></div>
             <Button onClick={() => {
               if (!form.name.trim()) return;
               setState((s) => ({ ...s, cashboxes: [...s.cashboxes, { ...form, id: uid() }] }));
