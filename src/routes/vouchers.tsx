@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -8,83 +8,36 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, Pencil, MessageCircle } from "lucide-react";
-import {
-  setState, useAppState, uid, formatCurrency, voucherTypeLabels,
-  currencyLabels, currencySymbols, CURRENCIES, nextVoucherNumber,
-  type Voucher, type VoucherType, type Currency, getState,
-} from "@/lib/store";
-import { buildVoucherMessage, sendWhatsapp, maybeAutoSend } from "@/lib/whatsapp";
-import { toast } from "sonner";
+import { Plus, Trash2 } from "lucide-react";
+import { setState, useAppState, uid, formatCurrency, voucherTypeLabels, currencyLabels, currencySymbols, CURRENCIES, type Voucher, type VoucherType, type Currency } from "@/lib/store";
 
 export const Route = createFileRoute("/vouchers")({ component: VouchersPage });
 
 const emptyForm = (): Voucher => ({
-  id: "", number: "", date: new Date().toISOString().slice(0, 10),
-  clientId: "", toClientId: "", cashboxId: "main", toCashboxId: "",
-  description: "", amount: 0, commission: 0, type: "receipt", currency: "YER",
+  id: "", date: new Date().toISOString().slice(0, 10),
+  clientId: "", cashboxId: "main", toCashboxId: "",
+  description: "", amount: 0, type: "receipt", currency: "YER",
 });
 
 function VouchersPage() {
   const state = useAppState((s) => s);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<Voucher>(emptyForm());
-  const isEdit = !!form.id;
 
-  const needsClient = ["credit", "debit", "receipt", "payment", "adjustment", "compound"].includes(form.type);
-  const needsToClient = form.type === "compound";
+  const needsClient = ["credit", "debit", "receipt", "payment", "adjustment"].includes(form.type);
   const needsCashbox = ["receipt", "payment", "transfer"].includes(form.type);
   const needsToCashbox = form.type === "transfer";
 
   const srcBox = state.cashboxes.find((c) => c.id === form.cashboxId);
   const dstBox = state.cashboxes.find((c) => c.id === form.toCashboxId);
   const isCrossCurrency = needsToCashbox && srcBox && dstBox && srcBox.currency !== dstBox.currency;
+  // For non-transfer vouchers, the currency follows the cashbox if picked; else user selects.
   const effectiveCurrency: Currency = needsCashbox && srcBox ? srcBox.currency : form.currency;
-
-  const openNew = () => { setForm({ ...emptyForm(), number: nextVoucherNumber(state) }); setOpen(true); };
-  const openEdit = (v: Voucher) => { setForm({ ...v }); setOpen(true); };
-
-  const save = () => {
-    if (form.amount <= 0) { toast.error("أدخل مبلغاً صحيحاً"); return; }
-    if (needsClient && !form.clientId) { toast.error("اختر العميل"); return; }
-    if (needsToClient && !form.toClientId) { toast.error("اختر العميل الثاني"); return; }
-    const finalCurrency: Currency = needsCashbox && srcBox ? srcBox.currency : form.currency;
-    const finalToAmount = form.type === "transfer" && isCrossCurrency ? (form.toAmount || form.amount) : (form.type === "transfer" ? form.amount : undefined);
-    const record: Voucher = { ...form, currency: finalCurrency, toAmount: finalToAmount };
-    if (!isEdit) {
-      record.id = uid();
-      record.number = record.number || nextVoucherNumber(state);
-      setState((s) => ({ ...s, vouchers: [...s.vouchers, record] }));
-      toast.success(`تم حفظ السند #${record.number}`);
-    } else {
-      setState((s) => ({ ...s, vouchers: s.vouchers.map((x) => x.id === record.id ? record : x) }));
-      toast.success(`تم تحديث السند #${record.number}`);
-    }
-    setOpen(false);
-    // auto-send whatsapp
-    if (needsClient) {
-      const client = getState().clients.find((c) => c.id === record.clientId);
-      if (client?.phone) maybeAutoSend(client.phone, buildVoucherMessage(record));
-    }
-  };
-
-  const remove = (id: string) => {
-    if (!confirm("حذف السند؟")) return;
-    setState((s) => ({ ...s, vouchers: s.vouchers.filter((x) => x.id !== id) }));
-  };
-
-  const sendWA = (v: Voucher) => {
-    const client = state.clients.find((c) => c.id === v.clientId);
-    if (!client?.phone) { toast.error("لا يوجد رقم واتساب"); return; }
-    sendWhatsapp(client.phone, buildVoucherMessage(v));
-  };
-
-  const sortedTypes: VoucherType[] = useMemo(() => ["debit", "credit", "compound", "receipt", "payment", "transfer", "adjustment"], []);
 
   return (
     <AppShell>
-      <PageHeader title="السندات والقيود" subtitle="مدين · دائن · قيد بسيط · قبض/صرف · حوالات صناديق" actions={
-        <Button onClick={openNew}><Plus className="w-4 h-4 ml-1" /> سند جديد</Button>
+      <PageHeader title="السندات والقيود" subtitle="سند بسيط: تاريخ، عميل، صندوق، بيان، مبلغ، نوع" actions={
+        <Button onClick={() => { setForm(emptyForm()); setOpen(true); }}><Plus className="w-4 h-4 ml-1" /> سند جديد</Button>
       } />
 
       <div className="grid gap-2">
@@ -93,21 +46,18 @@ function VouchersPage() {
         )}
         {[...state.vouchers].reverse().map((v) => {
           const client = state.clients.find((c) => c.id === v.clientId);
-          const toClient = state.clients.find((c) => c.id === v.toClientId);
           const cash = state.cashboxes.find((c) => c.id === v.cashboxId);
           return (
             <div key={v.id} className="bg-card border border-border rounded-xl p-3 flex items-center gap-3">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="bg-primary/15 text-primary text-xs px-2 py-0.5 rounded-full font-bold">{voucherTypeLabels[v.type]}</span>
-                  <span className="text-[11px] bg-muted text-muted-foreground px-2 py-0.5 rounded-full">#{v.number}</span>
                   <span className="text-xs text-muted-foreground">{v.date}</span>
                 </div>
                 <div className="text-sm mt-1 truncate">{v.description || "—"}</div>
                 <div className="text-xs text-muted-foreground">
-                  {client?.name && <>العميل: {client.name} </>}
-                  {toClient?.name && <> ← {toClient.name} </>}
-                  {cash?.name && <> · الصندوق: {cash.name}</>}
+                  {client?.name && <>العميل: {client.name} · </>}
+                  {cash?.name && <>الصندوق: {cash.name}</>}
                 </div>
               </div>
               <div className="text-lg font-extrabold text-primary text-left">
@@ -116,11 +66,10 @@ function VouchersPage() {
                   <div className="text-[10px] font-normal text-muted-foreground">← {formatCurrency(v.toAmount, state.cashboxes.find((c) => c.id === v.toCashboxId)?.currency ?? v.currency)}</div>
                 )}
               </div>
-              <div className="flex flex-col gap-1">
-                <Button size="icon" variant="ghost" onClick={() => sendWA(v)} title="إرسال واتساب"><MessageCircle className="w-4 h-4 text-success" /></Button>
-                <Button size="icon" variant="ghost" onClick={() => openEdit(v)} title="تعديل"><Pencil className="w-4 h-4" /></Button>
-                <Button size="icon" variant="ghost" onClick={() => remove(v.id)} title="حذف"><Trash2 className="w-4 h-4 text-destructive" /></Button>
-              </div>
+              <Button size="icon" variant="ghost" onClick={() => {
+                if (!confirm("حذف السند؟")) return;
+                setState((s) => ({ ...s, vouchers: s.vouchers.filter((x) => x.id !== v.id) }));
+              }}><Trash2 className="w-4 h-4 text-destructive" /></Button>
             </div>
           );
         })}
@@ -128,33 +77,23 @@ function VouchersPage() {
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>{isEdit ? `تعديل السند #${form.number}` : `سند جديد #${form.number}`}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>سند جديد</DialogTitle></DialogHeader>
           <div className="grid gap-3">
             <div className="grid gap-1.5"><Label>نوع العملية</Label>
               <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v as VoucherType })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {sortedTypes.map((k) => <SelectItem key={k} value={k}>{voucherTypeLabels[k]}</SelectItem>)}
+                  {(Object.keys(voucherTypeLabels) as VoucherType[]).map((k) =>
+                    <SelectItem key={k} value={k}>{voucherTypeLabels[k]}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="grid gap-1.5"><Label>رقم السند</Label><Input value={form.number} onChange={(e) => setForm({ ...form, number: e.target.value })} /></div>
-              <div className="grid gap-1.5"><Label>التاريخ</Label><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
-            </div>
+            <div className="grid gap-1.5"><Label>التاريخ</Label><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
             {needsClient && (
-              <div className="grid gap-1.5"><Label>{needsToClient ? "من العميل (مدين)" : "العميل"}</Label>
+              <div className="grid gap-1.5"><Label>العميل</Label>
                 <Select value={form.clientId} onValueChange={(v) => setForm({ ...form, clientId: v })}>
                   <SelectTrigger><SelectValue placeholder="اختر عميل" /></SelectTrigger>
                   <SelectContent>{state.clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
-            )}
-            {needsToClient && (
-              <div className="grid gap-1.5"><Label>إلى العميل (دائن)</Label>
-                <Select value={form.toClientId} onValueChange={(v) => setForm({ ...form, toClientId: v })}>
-                  <SelectTrigger><SelectValue placeholder="اختر عميل" /></SelectTrigger>
-                  <SelectContent>{state.clients.filter((c) => c.id !== form.clientId).map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
             )}
@@ -184,13 +123,8 @@ function VouchersPage() {
             )}
             <div className="grid gap-1.5">
               <Label>المبلغ {needsCashbox && srcBox ? `(${currencySymbols[srcBox.currency]})` : `(${currencySymbols[effectiveCurrency]})`}</Label>
-              <Input type="number" inputMode="decimal" placeholder="0" value={form.amount || ""} onChange={(e) => setForm({ ...form, amount: Number(e.target.value) || 0 })} />
+              <Input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: Number(e.target.value) || 0 })} />
             </div>
-            {form.type === "compound" && (
-              <div className="grid gap-1.5"><Label>عمولة (اختياري)</Label>
-                <Input type="number" inputMode="decimal" placeholder="0" value={form.commission || ""} onChange={(e) => setForm({ ...form, commission: Number(e.target.value) || 0 })} />
-              </div>
-            )}
             {isCrossCurrency && srcBox && dstBox && (
               <div className="grid grid-cols-2 gap-3 p-3 bg-accent/30 rounded-lg border border-border">
                 <div className="grid gap-1.5"><Label className="text-xs">سعر الصرف</Label>
@@ -203,10 +137,17 @@ function VouchersPage() {
                 <div className="grid gap-1.5"><Label className="text-xs">المبلغ المستلم ({currencySymbols[dstBox.currency]})</Label>
                   <Input type="number" value={form.toAmount ?? ""} onChange={(e) => setForm({ ...form, toAmount: Number(e.target.value) || 0 })} />
                 </div>
+                <div className="col-span-2 text-[11px] text-muted-foreground">تحويل من عملة إلى أخرى — أدخل سعر الصرف أو المبلغ المستلم يدوياً.</div>
               </div>
             )}
             <div className="grid gap-1.5"><Label>البيان</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
-            <Button onClick={save}>{isEdit ? "حفظ التعديلات" : "حفظ السند"}</Button>
+            <Button onClick={() => {
+              if (form.amount <= 0) return;
+              const finalCurrency: Currency = needsCashbox && srcBox ? srcBox.currency : form.currency;
+              const finalToAmount = form.type === "transfer" && isCrossCurrency ? (form.toAmount || form.amount) : (form.type === "transfer" ? form.amount : undefined);
+              setState((s) => ({ ...s, vouchers: [...s.vouchers, { ...form, id: uid(), currency: finalCurrency, toAmount: finalToAmount }] }));
+              setOpen(false);
+            }}>حفظ السند</Button>
           </div>
         </DialogContent>
       </Dialog>
