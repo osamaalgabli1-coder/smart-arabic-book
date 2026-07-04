@@ -276,9 +276,9 @@ export function clientLedger(state: AppState, clientId: string): Record<Currency
       if (v.toClientId === clientId) {
         out[cur].push({
           id: v.id + "-to", number: v.number, date: v.date,
-          description: `${v.description || "قيد بسيط"} — من: ${nameOf(v.clientId)}`,
+          description: `${v.description || "قيد بسيط"} — من: ${nameOf(v.clientId)}${v.commissionTo ? ` (عمولة ${v.commissionTo})` : ""}`,
           typeLabel: "قيد بسيط (دائن)",
-          debit: 0, credit: v.amount, currency: cur,
+          debit: 0, credit: v.amount + (v.commissionTo || 0), currency: cur,
         });
       }
       continue;
