@@ -106,7 +106,33 @@ function ClientDialog({ open, onOpenChange, initial }: { open: boolean; onOpenCh
             </div>
           </F>
           <F label="العنوان"><Input value={form.address ?? ""} onChange={(e) => setForm({ ...form, address: e.target.value })} /></F>
-          <F label="الرصيد الافتتاحي"><Input type="number" inputMode="decimal" placeholder="0" value={form.openingBalance || ""} onChange={(e) => setForm({ ...form, openingBalance: Number(e.target.value) || 0 })} /></F>
+          <F label="الرصيد الافتتاحي">
+            <div className="flex gap-2">
+              <Input
+                type="number"
+                inputMode="decimal"
+                placeholder="0"
+                value={form.openingBalance ? Math.abs(form.openingBalance) : ""}
+                onChange={(e) => {
+                  const v = Number(e.target.value) || 0;
+                  const sign = (form.openingBalance ?? 0) < 0 ? -1 : 1;
+                  setForm({ ...form, openingBalance: v * sign });
+                }}
+              />
+              <Button
+                type="button"
+                variant={(form.openingBalance ?? 0) >= 0 ? "default" : "outline"}
+                onClick={() => setForm({ ...form, openingBalance: Math.abs(form.openingBalance || 0) })}
+                title="له (دائن)"
+              >له</Button>
+              <Button
+                type="button"
+                variant={(form.openingBalance ?? 0) < 0 ? "destructive" : "outline"}
+                onClick={() => setForm({ ...form, openingBalance: -Math.abs(form.openingBalance || 0) })}
+                title="عليه (مدين)"
+              >عليه</Button>
+            </div>
+          </F>
           <F label="ملاحظات"><Textarea value={form.notes ?? ""} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></F>
           <Button onClick={() => {
             if (!form.name.trim()) return;
