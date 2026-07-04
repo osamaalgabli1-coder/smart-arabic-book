@@ -53,6 +53,7 @@ export type Voucher = {
   description: string;
   amount: number;
   commission?: number; // عمولة اختيارية للقيد البسيط
+  commissionTo?: number; // عمولة تُضاف لحساب العميل الدائن (له)
   toAmount?: number; // للتحويل بين عملتين مختلفتين (المبلغ المستلم)
   exchangeRate?: number;
   currency: Currency;
@@ -173,7 +174,7 @@ export function clientBalances(state: AppState, clientId: string): Record<Curren
     const cur: Currency = v.currency ?? "YER";
     if (v.type === "compound") {
       if (v.clientId === clientId) out[cur] -= (v.amount + (v.commission || 0));
-      if (v.toClientId === clientId) out[cur] += v.amount;
+      if (v.toClientId === clientId) out[cur] += (v.amount + (v.commissionTo || 0));
     } else if (v.clientId === clientId) {
       if (v.type === "credit" || v.type === "payment") out[cur] += v.amount;
       else if (v.type === "debit" || v.type === "receipt") out[cur] -= v.amount;
