@@ -1,4 +1,6 @@
-import { getState, clientLedger, formatNumber, currencySymbols, currencyLabels, CURRENCIES, type Client, type Currency } from "@/lib/store";
+import { getState, clientLedger, clientBalance, formatNumber, currencySymbols, currencyLabels, CURRENCIES, type Client, type Currency } from "@/lib/store";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 function esc(s: string): string {
   return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c] as string));
@@ -59,7 +61,7 @@ function renderClientBlock(client: Client, opts: { from?: string; to?: string })
   return html;
 }
 
-function buildStatementHTML(clientIds: string[], opts: { from?: string; to?: string; title?: string } = {}): string {
+function buildStatementHTML(clientIds: string[], opts: { from?: string; to?: string; title?: string; autoPrint?: boolean } = {}): string {
   const s = getState();
   const co = s.company;
   const today = new Date().toISOString().slice(0, 10);
@@ -127,13 +129,13 @@ function buildStatementHTML(clientIds: string[], opts: { from?: string; to?: str
     <span>${esc(co.name)}</span>
     <span>${today}</span>
   </div>
-  <script>window.onload = () => setTimeout(() => window.print(), 300);</script>
+  ${opts.autoPrint ? `<script>window.onload = () => setTimeout(() => window.print(), 300);</script>` : ""}
 </body></html>`;
   return html;
 }
 
 export function openStatementPDF(clientIds: string[], opts: { from?: string; to?: string; title?: string } = {}) {
-  const html = buildStatementHTML(clientIds, opts);
+  const html = buildStatementHTML(clientIds, { ...opts, autoPrint: true });
   const w = window.open("", "_blank");
   if (!w) { alert("الرجاء السماح بفتح النوافذ للطباعة"); return; }
   w.document.open(); w.document.write(html); w.document.close();
@@ -148,4 +150,98 @@ export function downloadStatementHTML(clientIds: string[], opts: { from?: string
   a.href = url; a.download = name;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function triggerDownload(name: string, blob: Blob) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function fileDate() { return new Date().toISOString().slice(0, 10); }
+
+export async function downloadStatementPDF(clientIds: string[], opts: { from?: string; to?: string; title?: string } = {}) {
+  const html = buildStatementHTML(clientIds, opts);
+  const iframe = document.createElement("iframe");
+  iframe.style.position = "fixed";
+  iframe.style.left = "-10000px";
+  iframe.style.top = "0";
+  iframe.style.width = "800px";
+  iframe.style.height = "1200px";
+  document.body.appendChild(iframe);
+  const doc = iframe.contentDocument!;
+  doc.open(); doc.write(html); doc.close();
+  await new Promise((r) => setTimeout(r, 400));
+  const body = doc.body;
+  const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+  const pdfW = pdf.internal.pageSize.getWidth();
+  const pdfH = pdf.internal.pageSize.getHeight();
+  const sections = Array.from(body.querySelectorAll<HTMLElement>("section.client"));
+  const targets = sections.length ? sections : [body];
+  for (let i = 0; i < targets.length; i++) {
+    const canvas = await html2canvas(targets[i], { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
+    const img = canvas.toDataURL("image/jpeg", 0.92);
+    const imgH = (canvas.height * pdfW) / canvas.width;
+    if (imgH <= pdfH) {
+      if (i > 0) pdf.addPage();
+      pdf.addImage(img, "JPEG", 0, 0, pdfW, imgH);
+    } else {
+      // paginate a single tall section
+      const pageCanvasH = (canvas.width * pdfH) / pdfW;
+      let y = 0; let first = true;
+      while (y < canvas.height) {
+        const sliceH = Math.min(pageCanvasH, canvas.height - y);
+        const c2 = document.createElement("canvas");
+        c2.width = canvas.width; c2.height = sliceH;
+        const ctx = c2.getContext("2d")!;
+        ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, c2.width, c2.height);
+        ctx.drawImage(canvas, 0, y, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
+        const slice = c2.toDataURL("image/jpeg", 0.92);
+        if (!first || i > 0) pdf.addPage();
+        first = false;
+        pdf.addImage(slice, "JPEG", 0, 0, pdfW, (sliceH * pdfW) / canvas.width);
+        y += sliceH;
+      }
+    }
+  }
+  document.body.removeChild(iframe);
+  const name = (opts.title ?? "كشف-حساب") + "-" + fileDate() + ".pdf";
+  pdf.save(name);
+}
+
+export function downloadStatementJSON(clientIds: string[], opts: { from?: string; to?: string; title?: string; mode?: "detailed" | "summary" } = {}) {
+  const s = getState();
+  const mode = opts.mode ?? "detailed";
+  const clients = clientIds.map((id) => s.clients.find((c) => c.id === id)).filter(Boolean) as Client[];
+  const payload = {
+    company: s.company,
+    generatedAt: new Date().toISOString(),
+    period: { from: opts.from ?? null, to: opts.to ?? null },
+    mode,
+    clients: clients.map((c) => {
+      const ledger = clientLedger(s, c.id);
+      const perCurrency: Record<string, unknown> = {};
+      for (const cur of CURRENCIES) {
+        const rows = ledger[cur].filter((e) => (opts.from ? e.date >= opts.from : true) && (opts.to ? e.date <= opts.to : true));
+        const opening = (c.openingCurrency ?? "YER") === cur ? (c.openingBalance || 0) : 0;
+        let running = opening; let totalDebit = 0; let totalCredit = 0;
+        const entries = rows.map((e) => { running += e.credit - e.debit; totalDebit += e.debit; totalCredit += e.credit; return { ...e, balance: running }; });
+        perCurrency[cur] = mode === "detailed"
+          ? { opening, entries, totalDebit, totalCredit, closing: running }
+          : { opening, totalDebit, totalCredit, closing: running };
+      }
+      return {
+        id: c.id,
+        name: c.name,
+        phone: c.phone ?? null,
+        address: c.address ?? null,
+        balance: clientBalance(s, c.id),
+        perCurrency,
+      };
+    }),
+  };
+  const name = (opts.title ?? "كشف-حساب") + "-" + fileDate() + ".json";
+  triggerDownload(name, new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" }));
 }
