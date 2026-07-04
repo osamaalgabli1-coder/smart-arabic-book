@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
-import { FileText, FileSpreadsheet, Share2, Save, Users, User } from "lucide-react";
+import { FileText, FileSpreadsheet, Share2, Save, Users, User, Download } from "lucide-react";
 import { useAppState, getState, clientBalance, formatCurrency } from "@/lib/store";
-import { openStatementPDF } from "@/lib/statement-pdf";
+import { openStatementPDF, downloadStatementHTML } from "@/lib/statement-pdf";
 import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -68,6 +68,17 @@ function ExportPage() {
           <Btn icon={<Users />} label="كشف تفصيلي — كل العملاء" onClick={() => {
             if (state.clients.length === 0) { toast.error("لا يوجد عملاء"); return; }
             openStatementPDF(state.clients.map((c) => c.id), { title: "كشف حسابات كل العملاء" });
+          }} />
+          <Btn icon={<Download />} label="تنزيل كشف هذا العميل (إلى التنزيلات)" onClick={() => {
+            const c = state.clients.find((x) => x.id === clientId);
+            if (!c) { toast.error("اختر عميلاً"); return; }
+            downloadStatementHTML([c.id], { title: `كشف-حساب-${c.name}` });
+            toast.success("تم التنزيل إلى مجلد التنزيلات");
+          }} />
+          <Btn icon={<Download />} label="تنزيل كشف كل العملاء (إلى التنزيلات)" onClick={() => {
+            if (state.clients.length === 0) { toast.error("لا يوجد عملاء"); return; }
+            downloadStatementHTML(state.clients.map((c) => c.id), { title: "كشف-حسابات-كل-العملاء" });
+            toast.success("تم التنزيل إلى مجلد التنزيلات");
           }} />
         </div>
       </section>
