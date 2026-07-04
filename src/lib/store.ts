@@ -185,6 +185,9 @@ export function clientBalances(state: AppState, clientId: string): Record<Curren
     const cur = t.currency;
     if (t.transferType === "واردة") out[cur] += t.amount;
     else if (t.transferType === "صادرة") out[cur] -= t.amount;
+    // العمولات: الصادرة على حساب العميل (عليه)، الواردة لحساب العميل (له)
+    if (t.outgoingFee) out[cur] -= t.outgoingFee;
+    if (t.incomingFee) out[cur] += t.incomingFee;
   }
   return out;
 }
