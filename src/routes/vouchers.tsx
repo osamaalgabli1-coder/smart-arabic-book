@@ -22,7 +22,7 @@ export const Route = createFileRoute("/vouchers")({ component: VouchersPage });
 const emptyForm = (): Voucher => ({
   id: "", number: "", date: new Date().toISOString().slice(0, 10),
   clientId: "", toClientId: "", cashboxId: "main", toCashboxId: "",
-  description: "", amount: 0, commission: 0, type: "receipt", currency: "YER",
+  description: "", amount: 0, commission: 0, commissionTo: 0, type: "receipt", currency: "YER",
 });
 
 function VouchersPage() {
@@ -187,8 +187,13 @@ function VouchersPage() {
               <Input type="number" inputMode="decimal" placeholder="0" value={form.amount || ""} onChange={(e) => setForm({ ...form, amount: Number(e.target.value) || 0 })} />
             </div>
             {form.type === "compound" && (
-              <div className="grid gap-1.5"><Label>عمولة (اختياري)</Label>
-                <Input type="number" inputMode="decimal" placeholder="0" value={form.commission || ""} onChange={(e) => setForm({ ...form, commission: Number(e.target.value) || 0 })} />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="grid gap-1.5"><Label className="text-xs">عمولة على المدين (عليه)</Label>
+                  <Input type="number" inputMode="decimal" placeholder="0" value={form.commission || ""} onChange={(e) => setForm({ ...form, commission: Number(e.target.value) || 0 })} />
+                </div>
+                <div className="grid gap-1.5"><Label className="text-xs">عمولة للدائن (له)</Label>
+                  <Input type="number" inputMode="decimal" placeholder="0" value={form.commissionTo || ""} onChange={(e) => setForm({ ...form, commissionTo: Number(e.target.value) || 0 })} />
+                </div>
               </div>
             )}
             {isCrossCurrency && srcBox && dstBox && (
