@@ -1,4 +1,6 @@
-import { getState, clientLedger, formatNumber, currencySymbols, currencyLabels, CURRENCIES, type Client, type Currency } from "@/lib/store";
+import { getState, clientLedger, clientBalance, formatNumber, currencySymbols, currencyLabels, CURRENCIES, type Client, type Currency } from "@/lib/store";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 function esc(s: string): string {
   return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c] as string));
@@ -59,7 +61,7 @@ function renderClientBlock(client: Client, opts: { from?: string; to?: string })
   return html;
 }
 
-function buildStatementHTML(clientIds: string[], opts: { from?: string; to?: string; title?: string } = {}): string {
+function buildStatementHTML(clientIds: string[], opts: { from?: string; to?: string; title?: string; autoPrint?: boolean } = {}): string {
   const s = getState();
   const co = s.company;
   const today = new Date().toISOString().slice(0, 10);
@@ -127,13 +129,13 @@ function buildStatementHTML(clientIds: string[], opts: { from?: string; to?: str
     <span>${esc(co.name)}</span>
     <span>${today}</span>
   </div>
-  <script>window.onload = () => setTimeout(() => window.print(), 300);</script>
+  ${opts.autoPrint ? `<script>window.onload = () => setTimeout(() => window.print(), 300);</script>` : ""}
 </body></html>`;
   return html;
 }
 
 export function openStatementPDF(clientIds: string[], opts: { from?: string; to?: string; title?: string } = {}) {
-  const html = buildStatementHTML(clientIds, opts);
+  const html = buildStatementHTML(clientIds, { ...opts, autoPrint: true });
   const w = window.open("", "_blank");
   if (!w) { alert("الرجاء السماح بفتح النوافذ للطباعة"); return; }
   w.document.open(); w.document.write(html); w.document.close();
