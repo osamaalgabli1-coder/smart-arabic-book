@@ -133,8 +133,8 @@ function TransfersPage() {
             </F>
             <F label="المبلغ"><Input type="number" inputMode="decimal" placeholder="0" value={form.amount || ""} onChange={(e) => setForm({ ...form, amount: Number(e.target.value) || 0 })} /></F>
             <div className="grid grid-cols-2 gap-3">
-              <F label="عمولة صادرة"><Input type="number" inputMode="decimal" placeholder="0" value={form.outgoingFee || ""} onChange={(e) => setForm({ ...form, outgoingFee: Number(e.target.value) || 0 })} /></F>
-              <F label="عمولة واردة"><Input type="number" inputMode="decimal" placeholder="0" value={form.incomingFee || ""} onChange={(e) => setForm({ ...form, incomingFee: Number(e.target.value) || 0 })} /></F>
+              <F label="عمولة صادرة (على حساب العميل — عليه)"><Input type="number" inputMode="decimal" placeholder="0" value={form.outgoingFee || ""} onChange={(e) => setForm({ ...form, outgoingFee: Number(e.target.value) || 0 })} /></F>
+              <F label="عمولة واردة (لحساب العميل — له)"><Input type="number" inputMode="decimal" placeholder="0" value={form.incomingFee || ""} onChange={(e) => setForm({ ...form, incomingFee: Number(e.target.value) || 0 })} /></F>
             </div>
             <F label="التاريخ"><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></F>
             <F label="البيان"><Textarea value={form.description ?? ""} onChange={(e) => setForm({ ...form, description: e.target.value })} /></F>
