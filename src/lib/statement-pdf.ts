@@ -59,7 +59,7 @@ function renderClientBlock(client: Client, opts: { from?: string; to?: string })
   return html;
 }
 
-export function openStatementPDF(clientIds: string[], opts: { from?: string; to?: string; title?: string } = {}) {
+function buildStatementHTML(clientIds: string[], opts: { from?: string; to?: string; title?: string } = {}): string {
   const s = getState();
   const co = s.company;
   const today = new Date().toISOString().slice(0, 10);
@@ -129,8 +129,23 @@ export function openStatementPDF(clientIds: string[], opts: { from?: string; to?
   </div>
   <script>window.onload = () => setTimeout(() => window.print(), 300);</script>
 </body></html>`;
+  return html;
+}
 
+export function openStatementPDF(clientIds: string[], opts: { from?: string; to?: string; title?: string } = {}) {
+  const html = buildStatementHTML(clientIds, opts);
   const w = window.open("", "_blank");
   if (!w) { alert("الرجاء السماح بفتح النوافذ للطباعة"); return; }
   w.document.open(); w.document.write(html); w.document.close();
+}
+
+export function downloadStatementHTML(clientIds: string[], opts: { from?: string; to?: string; title?: string } = {}) {
+  const html = buildStatementHTML(clientIds, opts);
+  const name = (opts.title ?? "كشف-حساب") + "-" + new Date().toISOString().slice(0, 10) + ".html";
+  const blob = new Blob(["\uFEFF" + html], { type: "text/html;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

@@ -185,6 +185,9 @@ export function clientBalances(state: AppState, clientId: string): Record<Curren
     const cur = t.currency;
     if (t.transferType === "واردة") out[cur] += t.amount;
     else if (t.transferType === "صادرة") out[cur] -= t.amount;
+    // العمولات: الصادرة على حساب العميل (عليه)، الواردة لحساب العميل (له)
+    if (t.outgoingFee) out[cur] -= t.outgoingFee;
+    if (t.incomingFee) out[cur] += t.incomingFee;
   }
   return out;
 }
@@ -299,6 +302,22 @@ export function clientLedger(state: AppState, clientId: string): Record<Currency
       typeLabel: isOut ? "حوالة صادرة (مدين)" : "حوالة واردة (دائن)",
       debit: isOut ? t.amount : 0, credit: isOut ? 0 : t.amount, currency: cur,
     });
+    if (t.outgoingFee) {
+      out[cur].push({
+        id: t.id + "-ofee", number: t.number, date: t.date,
+        description: `عمولة حوالة صادرة #${t.number}`,
+        typeLabel: "عمولة صادرة (مدين)",
+        debit: t.outgoingFee, credit: 0, currency: cur,
+      });
+    }
+    if (t.incomingFee) {
+      out[cur].push({
+        id: t.id + "-ifee", number: t.number, date: t.date,
+        description: `عمولة حوالة واردة #${t.number}`,
+        typeLabel: "عمولة واردة (دائن)",
+        debit: 0, credit: t.incomingFee, currency: cur,
+      });
+    }
   }
   for (const cur of CURRENCIES) out[cur].sort((a, b) => a.date.localeCompare(b.date) || a.number.localeCompare(b.number));
   return out;
