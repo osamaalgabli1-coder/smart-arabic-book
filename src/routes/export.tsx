@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
-import { FileText, FileSpreadsheet, Share2, Save, Users, User, Download } from "lucide-react";
+import { FileText, FileSpreadsheet, Share2, Save, Users, User, Download, FileJson, FileDown } from "lucide-react";
 import { useAppState, getState, clientBalance, formatCurrency } from "@/lib/store";
-import { openStatementPDF, downloadStatementHTML } from "@/lib/statement-pdf";
+import { openStatementPDF, downloadStatementHTML, downloadStatementPDF, downloadStatementJSON } from "@/lib/statement-pdf";
 import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -36,6 +36,12 @@ function ExportPage() {
     s.clients.forEach((c) => rows.push([c.name, c.phone ?? "", c.address ?? "", formatCurrency(clientBalance(s, c.id))]));
     download("clients.csv", toCSV(rows), "text/csv;charset=utf-8");
     toast.success("تم تصدير الملف");
+  };
+
+  const allIds = () => state.clients.map((c) => c.id);
+  const guardAll = () => {
+    if (state.clients.length === 0) { toast.error("لا يوجد عملاء"); return false; }
+    return true;
   };
 
   const shareWhatsapp = () => {
@@ -90,6 +96,66 @@ function ExportPage() {
           <Btn icon={<FileSpreadsheet />} label="Excel — قائمة العملاء (CSV)" onClick={exportClientsCSV} />
           <Btn icon={<Share2 />} label="مشاركة عبر واتساب" onClick={shareWhatsapp} />
           <Btn icon={<Save />} label="حفظ في الجهاز (CSV)" onClick={exportClientsCSV} />
+        </div>
+      </section>
+
+      <section className="mt-6">
+        <h3 className="font-bold text-primary mb-3 text-sm">تصدير كل العملاء — PDF و JSON (إلى التنزيلات)</h3>
+        <div className="grid sm:grid-cols-2 gap-3">
+          <Btn icon={<FileDown />} label="PDF — كشف تفصيلي لكل العملاء" onClick={async () => {
+            if (!guardAll()) return;
+            toast.info("جاري إنشاء ملف PDF...");
+            try { await downloadStatementPDF(allIds(), { title: "كشف-تفصيلي-كل-العملاء" }); toast.success("تم التنزيل"); }
+            catch (e) { toast.error("تعذّر إنشاء PDF"); console.error(e); }
+          }} />
+          <Btn icon={<FileDown />} label="PDF — كشف إجمالي لكل العملاء" onClick={async () => {
+            if (!guardAll()) return;
+            const s = getState();
+            const html = `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>كشف إجمالي</title>
+<style>body{font-family:"Cairo","Tajawal",Arial,sans-serif;padding:16px;color:#111}
+h1{color:#1a4b8f;text-align:center;margin:8px 0}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}
+th,td{border:1px solid #bbb;padding:8px;text-align:center}
+th{background:#e9e9e9}
+.name{text-align:right}
+.bal{font-weight:800;color:#c0392b}
+.header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #ddd;padding-bottom:8px}
+.logo{width:60px;height:60px;object-fit:contain}</style></head><body>
+<div class="header"><div>${s.company.logo ? `<img class="logo" src="${s.company.logo}">` : ""}</div>
+<div style="text-align:left"><div style="font-weight:800">${s.company.name}</div><div style="font-size:12px">${s.company.phone ?? ""}</div></div></div>
+<h1>كشف إجمالي — كل العملاء</h1>
+<table><thead><tr><th>#</th><th>الاسم</th><th>الهاتف</th><th>الرصيد الإجمالي</th></tr></thead><tbody>
+${s.clients.map((c, i) => `<tr><td>${i + 1}</td><td class="name">${c.name}</td><td>${c.phone ?? "—"}</td><td class="bal">${formatCurrency(clientBalance(s, c.id))}</td></tr>`).join("")}
+</tbody></table></body></html>`;
+            const iframe = document.createElement("iframe");
+            iframe.style.cssText = "position:fixed;left:-10000px;top:0;width:800px;height:1200px";
+            document.body.appendChild(iframe);
+            const doc = iframe.contentDocument!;
+            doc.open(); doc.write(html); doc.close();
+            await new Promise((r) => setTimeout(r, 300));
+            try {
+              const { default: jsPDF } = await import("jspdf");
+              const html2canvas = (await import("html2canvas")).default;
+              const canvas = await html2canvas(doc.body, { scale: 2, backgroundColor: "#fff" });
+              const pdf = new jsPDF({ unit: "mm", format: "a4" });
+              const w = pdf.internal.pageSize.getWidth();
+              const h = (canvas.height * w) / canvas.width;
+              pdf.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, w, h);
+              pdf.save("كشف-اجمالي-كل-العملاء-" + new Date().toISOString().slice(0, 10) + ".pdf");
+              toast.success("تم التنزيل");
+            } catch (e) { toast.error("تعذّر إنشاء PDF"); console.error(e); }
+            document.body.removeChild(iframe);
+          }} />
+          <Btn icon={<FileJson />} label="JSON — كشف تفصيلي لكل العملاء" onClick={() => {
+            if (!guardAll()) return;
+            downloadStatementJSON(allIds(), { title: "كشف-تفصيلي-كل-العملاء", mode: "detailed" });
+            toast.success("تم التنزيل");
+          }} />
+          <Btn icon={<FileJson />} label="JSON — كشف إجمالي لكل العملاء" onClick={() => {
+            if (!guardAll()) return;
+            downloadStatementJSON(allIds(), { title: "كشف-اجمالي-كل-العملاء", mode: "summary" });
+            toast.success("تم التنزيل");
+          }} />
         </div>
       </section>
     </AppShell>
