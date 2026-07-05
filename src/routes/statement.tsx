@@ -84,7 +84,7 @@ function StatementPage() {
           {CURRENCIES.map((cur) => {
             const d = perCurrency[cur];
             if (d.rows.length === 0 && d.opening === 0) return null;
-            const finalLabel = d.closing >= 0 ? "له" : "عليه";
+            const finalLabel = d.closing >= 0 ? "لكم" : "عليكم";
             return (
               <div key={cur} className="border-t border-border">
                 <div className="bg-accent/40 px-4 py-2 font-bold text-sm text-primary">{currencyLabels[cur]} ({currencySymbols[cur]})</div>
