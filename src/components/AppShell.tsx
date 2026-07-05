@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, Home, Users, Wallet, FileText, Send, BarChart3, Settings, Download, Upload, Building2, X } from "lucide-react";
+import { Menu, Home, Users, Wallet, FileText, Send, BarChart3, Settings, Download, Upload, Building2, X, MessageCircle, Phone } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { useAppState } from "@/lib/store";
 import { cn } from "@/lib/utils";
