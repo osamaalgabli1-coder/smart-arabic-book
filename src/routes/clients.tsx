@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -73,6 +73,11 @@ function ClientDialog({ open, onOpenChange, initial }: { open: boolean; onOpenCh
   const [form, setForm] = useState<Client>(initial ?? emptyC);
   const key = initial?.id ?? "new";
 
+  useEffect(() => {
+    if (open) setForm(initial ? { ...initial } : { ...emptyC });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, initial]);
+
   const pickContact = async () => {
     const nav = navigator as unknown as { contacts?: ContactsManager };
     if (!nav.contacts?.select) {
@@ -92,7 +97,7 @@ function ClientDialog({ open, onOpenChange, initial }: { open: boolean; onOpenCh
   };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (v) setForm(initial ?? emptyC); }}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent key={key}>
         <DialogHeader><DialogTitle>{initial ? "تعديل عميل" : "عميل جديد"}</DialogTitle></DialogHeader>
         <div className="grid gap-3">
