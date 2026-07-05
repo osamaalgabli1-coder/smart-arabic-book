@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
-import { FileText, FileSpreadsheet, Share2, Save, Users, User, Download, FileJson, FileDown } from "lucide-react";
+import { FileText, Share2, Users, User, Download, FileDown } from "lucide-react";
 import { useAppState, getState, clientBalance, formatCurrency } from "@/lib/store";
-import { openStatementPDF, downloadStatementHTML, downloadStatementPDF, downloadStatementJSON } from "@/lib/statement-pdf";
+import { openStatementPDF, downloadStatementHTML, downloadStatementPDF } from "@/lib/statement-pdf";
 import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -12,31 +12,9 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/export")({ component: ExportPage });
 
-function toCSV(rows: string[][]) {
-  return rows.map((r) => r.map((c) => `"${String(c).replaceAll('"', '""')}"`).join(",")).join("\n");
-}
-
-function download(name: string, content: string, type: string) {
-  const blob = new Blob(["\uFEFF" + content], { type });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = name;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
 function ExportPage() {
   const state = useAppState((s) => s);
   const [clientId, setClientId] = useState<string>(state.clients[0]?.id ?? "");
-
-  const exportClientsCSV = () => {
-    const s = getState();
-    const rows = [["الاسم", "الهاتف", "العنوان", "الرصيد"]];
-    s.clients.forEach((c) => rows.push([c.name, c.phone ?? "", c.address ?? "", formatCurrency(clientBalance(s, c.id))]));
-    download("clients.csv", toCSV(rows), "text/csv;charset=utf-8");
-    toast.success("تم تصدير الملف");
-  };
 
   const allIds = () => state.clients.map((c) => c.id);
   const guardAll = () => {
@@ -93,14 +71,12 @@ function ExportPage() {
         <h3 className="font-bold text-primary mb-3 text-sm">تصدير إجمالي</h3>
         <div className="grid sm:grid-cols-2 gap-3">
           <Btn icon={<FileText />} label="كشف العملاء الإجمالي (طباعة)" onClick={() => window.print()} />
-          <Btn icon={<FileSpreadsheet />} label="Excel — قائمة العملاء (CSV)" onClick={exportClientsCSV} />
           <Btn icon={<Share2 />} label="مشاركة عبر واتساب" onClick={shareWhatsapp} />
-          <Btn icon={<Save />} label="حفظ في الجهاز (CSV)" onClick={exportClientsCSV} />
         </div>
       </section>
 
       <section className="mt-6">
-        <h3 className="font-bold text-primary mb-3 text-sm">تصدير كل العملاء — PDF و JSON (إلى التنزيلات)</h3>
+        <h3 className="font-bold text-primary mb-3 text-sm">تصدير كل العملاء — PDF (إلى التنزيلات)</h3>
         <div className="grid sm:grid-cols-2 gap-3">
           <Btn icon={<FileDown />} label="PDF — كشف تفصيلي لكل العملاء" onClick={async () => {
             if (!guardAll()) return;
