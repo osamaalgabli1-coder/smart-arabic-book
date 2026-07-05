@@ -122,16 +122,6 @@ ${s.clients.map((c, i) => `<tr><td>${i + 1}</td><td class="name">${c.name}</td><
             } catch (e) { toast.error("تعذّر إنشاء PDF"); console.error(e); }
             document.body.removeChild(iframe);
           }} />
-          <Btn icon={<FileJson />} label="JSON — كشف تفصيلي لكل العملاء" onClick={() => {
-            if (!guardAll()) return;
-            downloadStatementJSON(allIds(), { title: "كشف-تفصيلي-كل-العملاء", mode: "detailed" });
-            toast.success("تم التنزيل");
-          }} />
-          <Btn icon={<FileJson />} label="JSON — كشف إجمالي لكل العملاء" onClick={() => {
-            if (!guardAll()) return;
-            downloadStatementJSON(allIds(), { title: "كشف-اجمالي-كل-العملاء", mode: "summary" });
-            toast.success("تم التنزيل");
-          }} />
         </div>
       </section>
     </AppShell>
