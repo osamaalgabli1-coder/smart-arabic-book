@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import {
   Users, Wallet, FileText, Send, ClipboardList, BarChart3,
-  Upload, Download, Building2, FileDown, Code2, Package,
+  Upload, Download, Building2, FileDown,
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { useAppState, formatCurrency, sumCashboxesByCurrency, sumClientsByCurrency, CURRENCIES, currencySymbols } from "@/lib/store";
@@ -22,8 +22,6 @@ const cards = [
   { to: "/backup", label: "الاستعادة", icon: Download, tone: "text-success" },
   { to: "/company", label: "إعدادات الشركة", icon: Building2, tone: "text-primary" },
   { to: "/export", label: "تصدير البيانات", icon: FileDown, tone: "text-primary" },
-  { to: "/customize", label: "تعديل وتطوير البرنامج", icon: Code2, tone: "text-success" },
-  { to: "/build-app", label: "إنشاء تطبيق مستقل", icon: Package, tone: "text-success" },
 ] as const;
 
 function Index() {
