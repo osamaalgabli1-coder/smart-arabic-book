@@ -96,6 +96,26 @@ export function AppShell({ children }: { children: ReactNode }) {
                   </Link>
                 );
               })}
+              <div className="my-2 border-t border-border" />
+              <div className="px-4 pt-2 pb-1 text-[11px] font-bold text-muted-foreground">تواصل معنا</div>
+              <a
+                href="https://wa.me/967772184441"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setOpen(false)}
+                className="flex items-center justify-between gap-3 px-4 py-3 rounded-lg text-sm hover:bg-success/15 text-success font-bold"
+              >
+                <span>واتساب المطور</span>
+                <MessageCircle className="w-5 h-5" />
+              </a>
+              <a
+                href="tel:+967772184441"
+                onClick={() => setOpen(false)}
+                className="flex items-center justify-between gap-3 px-4 py-3 rounded-lg text-sm hover:bg-primary/15 text-primary font-bold"
+              >
+                <span>اتصال بالمطور</span>
+                <Phone className="w-5 h-5" />
+              </a>
             </nav>
           </aside>
         </div>
