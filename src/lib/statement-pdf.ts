@@ -30,7 +30,7 @@ function renderClientBlock(client: Client, opts: { from?: string; to?: string })
       </tr>`;
     }).join("");
     const finalBal = running;
-    const finalLabel = finalBal >= 0 ? "له" : "عليه";
+    const finalLabel = finalBal >= 0 ? "لكم" : "عليكم";
     html += `
     <div class="cur-block">
       <div class="cur-title">${currencyLabels[cur]} (${currencySymbols[cur]})</div>
