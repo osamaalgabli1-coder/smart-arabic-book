@@ -36,7 +36,7 @@ export function buildVoucherMessage(v: Voucher): string {
     `💵 المبلغ: ${formatCurrency(v.amount, cur)}`,
     v.commission ? `➕ العمولة: ${formatCurrency(v.commission, cur)}` : "",
     v.description ? `📝 البيان: ${v.description}` : "",
-    bals ? `📊 الرصيد الحالي ${bal >= 0 ? "لكم" : "عليكم"}: ${formatCurrency(Math.abs(bal), cur)}` : "",
+    bals ? `📊 الرصيد الحالي: ${formatCurrency(Math.abs(bal), cur)} ${bal >= 0 ? "له" : "عليه"}` : "",
     ``,
     `شكراً لتعاملكم معنا 🌹`,
   ].filter(Boolean);
@@ -60,7 +60,7 @@ export function buildTransferMessage(t: Transfer): string {
     `💵 المبلغ: ${formatCurrency(t.amount, t.currency)}`,
     (t.outgoingFee || t.incomingFee) ? `➕ العمولة: ${formatCurrency((t.outgoingFee || 0) + (t.incomingFee || 0), t.currency)}` : "",
     t.description ? `📝 البيان: ${t.description}` : "",
-    bals && client ? `📊 الرصيد الحالي ${bal >= 0 ? "لكم" : "عليكم"}: ${formatCurrency(Math.abs(bal), t.currency)}` : "",
+    bals && client ? `📊 الرصيد الحالي: ${formatCurrency(Math.abs(bal), t.currency)} ${bal >= 0 ? "له" : "عليه"}` : "",
     ``,
     `شكراً لتعاملكم معنا 🌹`,
   ].filter(Boolean);

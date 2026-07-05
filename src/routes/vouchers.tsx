@@ -79,7 +79,7 @@ function VouchersPage() {
     sendWhatsapp(client.phone, buildVoucherMessage(v));
   };
 
-  const sortedTypes: VoucherType[] = useMemo(() => ["debit", "credit", "compound", "transfer", "adjustment"], []);
+  const sortedTypes: VoucherType[] = useMemo(() => ["debit", "credit", "compound", "receipt", "payment", "transfer", "adjustment"], []);
 
   return (
     <AppShell>
