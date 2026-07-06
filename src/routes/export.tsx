@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
-import { FileText, Share2, Users, User, Download, FileDown } from "lucide-react";
+import { Share2, Users, User, Download, FileDown } from "lucide-react";
 import { useAppState, getState, clientBalance, formatCurrency } from "@/lib/store";
 import { openStatementPDF, downloadStatementHTML, downloadStatementPDF } from "@/lib/statement-pdf";
 import { useState } from "react";
