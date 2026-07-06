@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
-import { FileText, Share2, Users, User, Download, FileDown } from "lucide-react";
+import { Share2, Users, User, Download, FileDown } from "lucide-react";
 import { useAppState, getState, clientBalance, formatCurrency } from "@/lib/store";
 import { openStatementPDF, downloadStatementHTML, downloadStatementPDF } from "@/lib/statement-pdf";
 import { useState } from "react";
@@ -69,8 +69,23 @@ function ExportPage() {
 
       <section>
         <h3 className="font-bold text-primary mb-3 text-sm">تصدير إجمالي</h3>
+        <div className="grid sm:grid-cols-2 gap-3 mb-3">
+          <div className="grid gap-1.5">
+            <Label>اختر العميل لتصدير كشفه PDF</Label>
+            <Select value={clientId} onValueChange={setClientId}>
+              <SelectTrigger><SelectValue placeholder="اختر عميل" /></SelectTrigger>
+              <SelectContent>{state.clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+        </div>
         <div className="grid sm:grid-cols-2 gap-3">
-          <Btn icon={<FileText />} label="كشف العملاء الإجمالي (طباعة)" onClick={() => window.print()} />
+          <Btn icon={<FileDown />} label="كشف حساب عميل PDF" onClick={async () => {
+            const c = state.clients.find((x) => x.id === clientId);
+            if (!c) { toast.error("اختر عميلاً"); return; }
+            toast.info("جاري إنشاء ملف PDF...");
+            try { await downloadStatementPDF([c.id], { title: `كشف-حساب-${c.name}` }); toast.success("تم التنزيل"); }
+            catch (e) { toast.error("تعذّر إنشاء PDF"); console.error(e); }
+          }} />
           <Btn icon={<Share2 />} label="مشاركة عبر واتساب" onClick={shareWhatsapp} />
         </div>
       </section>
