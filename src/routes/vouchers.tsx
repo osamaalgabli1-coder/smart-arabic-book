@@ -4,8 +4,8 @@ import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { DescriptionField } from "@/components/DescriptionField";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash2, Pencil, MessageCircle } from "lucide-react";
@@ -222,27 +222,7 @@ function VouchersPage() {
                 </div>
               </div>
             )}
-            {form.type === "compound" && form.clientId && form.toClientId && (
-              <div className="grid gap-2 p-3 bg-accent/30 rounded-lg border border-border text-xs">
-                <div className="font-bold text-primary">البيان التلقائي للطرفين</div>
-                <div>
-                  <span className="font-bold">{state.clients.find(c => c.id === form.clientId)?.name} (عليه):</span>{" "}
-                  عليكم إلى حساب {state.clients.find(c => c.id === form.toClientId)?.name}
-                </div>
-                <div>
-                  <span className="font-bold">{state.clients.find(c => c.id === form.toClientId)?.name} (له):</span>{" "}
-                  لكم من حساب {state.clients.find(c => c.id === form.clientId)?.name}
-                </div>
-              </div>
-            )}
-            <div className="grid gap-1.5">
-              <Label>{form.type === "compound" ? "بيان إضافي (اختياري)" : "البيان"}</Label>
-              <DescriptionField
-                value={form.description}
-                onChange={(v) => setForm({ ...form, description: v })}
-                placeholder={form.type === "compound" ? "ملاحظات إضافية تُضاف لبيان الطرفين" : "اكتب بيان السند…"}
-              />
-            </div>
+            <div className="grid gap-1.5"><Label>البيان</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
             <Button onClick={save}>{isEdit ? "حفظ التعديلات" : "حفظ السند"}</Button>
           </div>
         </DialogContent>

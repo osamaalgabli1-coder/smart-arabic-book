@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DescriptionField } from "@/components/DescriptionField";
+import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2, Send, Pencil, MessageCircle } from "lucide-react";
 import { setState, useAppState, uid, formatCurrency, CURRENCIES, currencyLabels, currencySymbols, nextTransferNumber, getState, type Transfer, type Currency } from "@/lib/store";
 import { buildTransferMessage, sendWhatsapp, maybeAutoSend } from "@/lib/whatsapp";
@@ -137,7 +137,7 @@ function TransfersPage() {
               <F label="عمولة واردة (لحساب العميل — له)"><Input type="number" inputMode="decimal" placeholder="0" value={form.incomingFee || ""} onChange={(e) => setForm({ ...form, incomingFee: Number(e.target.value) || 0 })} /></F>
             </div>
             <F label="التاريخ"><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></F>
-            <F label="البيان"><DescriptionField value={form.description ?? ""} onChange={(v) => setForm({ ...form, description: v })} /></F>
+            <F label="البيان"><Textarea value={form.description ?? ""} onChange={(e) => setForm({ ...form, description: e.target.value })} /></F>
             <F label="الحالة">
               <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as Transfer["status"] })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>

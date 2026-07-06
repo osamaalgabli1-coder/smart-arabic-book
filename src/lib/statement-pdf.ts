@@ -95,9 +95,7 @@ function buildStatementHTML(clientIds: string[], opts: { from?: string; to?: str
 <style>
   @page { size: A4; margin: 12mm; }
   * { box-sizing: border-box; }
-  body { font-family: "Amiri","Tajawal","Cairo","Segoe UI",Arial,sans-serif; color:#111; margin:0; letter-spacing: 0.03em; word-spacing: 0.12em; }
-  table, th, td { letter-spacing: 0.04em; word-spacing: 0.14em; }
-  .statement-title, .co-name, .cur-title { letter-spacing: 0.06em; }
+  body { font-family: "Cairo","Tajawal","Segoe UI",Arial,sans-serif; color:#111; margin:0; }
   .client { padding: 8px 0; }
   .page-break { page-break-after: always; }
   .page-header { display:flex; justify-content:space-between; align-items:flex-start; border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 10px; }
