@@ -64,7 +64,11 @@ function VouchersPage() {
     // auto-send whatsapp
     if (needsClient) {
       const client = getState().clients.find((c) => c.id === record.clientId);
-      if (client?.phone) maybeAutoSend(client.phone, buildVoucherMessage(record));
+      if (client?.phone) maybeAutoSend(client.phone, buildVoucherMessage(record, "from"));
+    }
+    if (record.type === "compound") {
+      const toClient = getState().clients.find((c) => c.id === record.toClientId);
+      if (toClient?.phone) maybeAutoSend(toClient.phone, buildVoucherMessage(record, "to"));
     }
   };
 
@@ -73,10 +77,11 @@ function VouchersPage() {
     setState((s) => ({ ...s, vouchers: s.vouchers.filter((x) => x.id !== id) }));
   };
 
-  const sendWA = (v: Voucher) => {
-    const client = state.clients.find((c) => c.id === v.clientId);
+  const sendWA = (v: Voucher, role: "from" | "to" = "from") => {
+    const id = role === "to" ? v.toClientId : v.clientId;
+    const client = state.clients.find((c) => c.id === id);
     if (!client?.phone) { toast.error("لا يوجد رقم واتساب"); return; }
-    sendWhatsapp(client.phone, buildVoucherMessage(v));
+    sendWhatsapp(client.phone, buildVoucherMessage(v, role));
   };
 
   const sortedTypes: VoucherType[] = useMemo(() => ["debit", "credit", "compound", "transfer", "adjustment"], []);
@@ -117,7 +122,14 @@ function VouchersPage() {
                 )}
               </div>
               <div className="flex flex-col gap-1">
-                <Button size="icon" variant="ghost" onClick={() => sendWA(v)} title="إرسال واتساب"><MessageCircle className="w-4 h-4 text-success" /></Button>
+                <Button size="icon" variant="ghost" onClick={() => sendWA(v, "from")} title={v.type === "compound" ? `واتساب — ${client?.name ?? "المدين"} (عليه)` : "إرسال واتساب"}>
+                  <MessageCircle className="w-4 h-4 text-success" />
+                </Button>
+                {v.type === "compound" && (
+                  <Button size="icon" variant="ghost" onClick={() => sendWA(v, "to")} title={`واتساب — ${toClient?.name ?? "الدائن"} (له)`}>
+                    <MessageCircle className="w-4 h-4 text-primary" />
+                  </Button>
+                )}
                 <Button size="icon" variant="ghost" onClick={() => openEdit(v)} title="تعديل"><Pencil className="w-4 h-4" /></Button>
                 <Button size="icon" variant="ghost" onClick={() => remove(v.id)} title="حذف"><Trash2 className="w-4 h-4 text-destructive" /></Button>
               </div>

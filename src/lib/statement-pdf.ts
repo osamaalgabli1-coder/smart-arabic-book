@@ -1,4 +1,4 @@
-import { getState, clientLedger, clientBalance, formatNumber, currencySymbols, currencyLabels, CURRENCIES, type Client, type Currency } from "@/lib/store";
+import { getState, clientLedger, clientBalance, formatNumber, formatBalanceNumber, currencySymbols, currencyLabels, CURRENCIES, type Client, type Currency } from "@/lib/store";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -26,7 +26,7 @@ function renderClientBlock(client: Client, opts: { from?: string; to?: string })
         <td class="ltxt">${esc(e.description)}</td>
         <td class="deb">${e.debit ? formatNumber(e.debit) : "—"}</td>
         <td class="cre">${e.credit ? formatNumber(e.credit) : "—"}</td>
-        <td class="bal">${formatNumber(running)}</td>
+        <td class="bal">${formatBalanceNumber(running)}</td>
       </tr>`;
     }).join("");
     const finalBal = running;
@@ -39,7 +39,7 @@ function renderClientBlock(client: Client, opts: { from?: string; to?: string })
           <tr><th>التاريخ</th><th>رقم السند</th><th>التفاصيل</th><th>عليه</th><th>له</th><th>الرصيد</th></tr>
         </thead>
         <tbody>
-          <tr class="opening"><td colspan="5">الرصيد الافتتاحي</td><td class="bal">${formatNumber(opening)}</td></tr>
+          <tr class="opening"><td colspan="5">الرصيد الافتتاحي</td><td class="bal">${formatBalanceNumber(opening)}</td></tr>
           ${bodyRows}
         </tbody>
         <tfoot>

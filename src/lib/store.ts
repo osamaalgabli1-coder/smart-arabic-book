@@ -222,6 +222,23 @@ export function formatCurrency(n: number, currency: Currency = "YER"): string {
   return `${formatNumber(n)} ${currencySymbols[currency]}`;
 }
 
+// عرض الرصيد وفق اتفاقية العرض للمستخدم:
+// - الرصيد على العميل (سالب داخلياً) يُعرض بدون علامة سالب
+// - الرصيد للعميل (موجب داخلياً) يُعرض بعلامة سالب "-"
+export function formatBalanceDisplay(n: number, currency: Currency = "YER"): string {
+  if (n === 0) return formatCurrency(0, currency);
+  const abs = Math.abs(n);
+  const sign = n > 0 ? "-" : "";
+  return `${sign}${formatCurrency(abs, currency)}`;
+}
+
+export function formatBalanceNumber(n: number): string {
+  if (n === 0) return formatNumber(0);
+  const abs = Math.abs(n);
+  const sign = n > 0 ? "-" : "";
+  return `${sign}${formatNumber(abs)}`;
+}
+
 export function sumCashboxesByCurrency(state: AppState): Record<Currency, number> {
   const out: Record<Currency, number> = { YER: 0, SAR: 0, USD: 0 };
   for (const c of state.cashboxes) out[c.currency] += cashboxBalance(state, c.id);
