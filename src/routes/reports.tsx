@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
-import { useAppState, clientBalances, cashboxBalance, formatCurrency, sumCashboxesByCurrency, sumClientsByCurrency, CURRENCIES, currencyLabels, currencySymbols } from "@/lib/store";
+import { useAppState, clientBalances, cashboxBalance, formatCurrency, formatBalanceDisplay, sumCashboxesByCurrency, sumClientsByCurrency, CURRENCIES, currencyLabels, currencySymbols } from "@/lib/store";
 
 export const Route = createFileRoute("/reports")({ component: ReportsPage });
 
@@ -32,7 +32,7 @@ function ReportsPage() {
             <span>{currencyLabels[cur]} ({currencySymbols[cur]})</span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-3">
-            <Kpi k="أرصدة العملاء" v={formatCurrency(clientTotals[cur], cur)} />
+            <Kpi k="أرصدة العملاء" v={formatBalanceDisplay(clientTotals[cur], cur)} />
             <Kpi k="أرصدة الصناديق" v={formatCurrency(cashTotals[cur], cur)} />
             <Kpi k="مبالغ الحوالات" v={formatCurrency(transferTotals[cur], cur)} />
             <Kpi k="أرباح العمولات" v={formatCurrency(commissionTotals[cur], cur)} highlight />
@@ -41,7 +41,7 @@ function ReportsPage() {
             <Table headers={["العميل", "الهاتف", "الرصيد"]} rows={state.clients
               .map((c) => ({ c, bal: clientBalances(state, c.id)[cur] }))
               .filter(({ bal }) => bal !== 0)
-              .map(({ c, bal }) => [c.name, c.phone ?? "—", formatCurrency(bal, cur)])} />
+              .map(({ c, bal }) => [c.name, c.phone ?? "—", formatBalanceDisplay(bal, cur)])} />
           </Section>
           <Section title="أرصدة الصناديق">
             <Table headers={["الصندوق", "النوع", "الرصيد"]} rows={state.cashboxes.filter((c) => c.currency === cur).map((c) => [c.name, c.type === "main" ? "رئيسي" : "فرعي", formatCurrency(cashboxBalance(state, c.id), cur)])} />
