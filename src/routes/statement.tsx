@@ -69,7 +69,7 @@ function StatementPage() {
       {!client && <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-xl">اختر عميلاً لعرض الكشف</div>}
 
       {client && perCurrency && (
-        <div className="bg-card border-2 border-border rounded-xl overflow-hidden">
+        <div className="bg-card border-2 border-border rounded-xl overflow-hidden" style={{ fontFamily: '"Amiri","Tajawal","Cairo",Arial,sans-serif', letterSpacing: "0.03em", wordSpacing: "0.12em" }}>
           <div className="bg-header text-header-foreground p-4 flex items-center gap-3">
             {state.company.logo && (
               <img src={state.company.logo} alt="شعار" className="w-14 h-14 rounded-lg bg-white object-contain p-1" />
