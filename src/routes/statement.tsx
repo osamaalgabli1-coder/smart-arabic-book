@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { FileDown, Users } from "lucide-react";
-import { useAppState, clientLedger, formatNumber, currencyLabels, currencySymbols, CURRENCIES, type Currency } from "@/lib/store";
+import { useAppState, clientLedger, formatNumber, formatBalanceNumber, currencyLabels, currencySymbols, CURRENCIES, type Currency } from "@/lib/store";
 import { openStatementPDF } from "@/lib/statement-pdf";
 
 export const Route = createFileRoute("/statement")({ component: StatementPage });
@@ -103,7 +103,7 @@ function StatementPage() {
                     <tbody>
                       <tr className="border-t border-border bg-accent/20">
                         <td className="p-2" colSpan={5}>الرصيد الافتتاحي</td>
-                        <td className="p-2 font-bold">{formatNumber(d.opening)}</td>
+                        <td className="p-2 font-bold">{formatBalanceNumber(d.opening)}</td>
                       </tr>
                       {d.rows.map(({ e, balance }) => (
                         <tr key={e.id} className="border-t border-border">
@@ -112,7 +112,7 @@ function StatementPage() {
                           <td className="p-2 text-right">{e.description}</td>
                           <td className="p-2 text-destructive font-semibold">{e.debit ? formatNumber(e.debit) : "—"}</td>
                           <td className="p-2 text-success font-semibold">{e.credit ? formatNumber(e.credit) : "—"}</td>
-                          <td className="p-2 font-bold text-destructive">{formatNumber(balance)}</td>
+                          <td className="p-2 font-bold text-destructive">{formatBalanceNumber(balance)}</td>
                         </tr>
                       ))}
                     </tbody>
