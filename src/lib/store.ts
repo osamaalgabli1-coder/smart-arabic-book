@@ -283,17 +283,19 @@ export function clientLedger(state: AppState, clientId: string): Record<Currency
     const cur: Currency = v.currency ?? "YER";
     if (v.type === "compound") {
       if (v.clientId === clientId) {
+        const note = v.description ? ` — ${v.description}` : "";
         out[cur].push({
           id: v.id, number: v.number, date: v.date,
-          description: `${v.description || "قيد بسيط"} — إلى: ${nameOf(v.toClientId)}${v.commission ? ` (عمولة ${v.commission})` : ""}`,
+          description: `عليكم إلى حساب ${nameOf(v.toClientId)}${v.commission ? ` (عمولة ${v.commission})` : ""}${note}`,
           typeLabel: "قيد بسيط (مدين)",
           debit: v.amount + (v.commission || 0), credit: 0, currency: cur,
         });
       }
       if (v.toClientId === clientId) {
+        const note = v.description ? ` — ${v.description}` : "";
         out[cur].push({
           id: v.id + "-to", number: v.number, date: v.date,
-          description: `${v.description || "قيد بسيط"} — من: ${nameOf(v.clientId)}${v.commissionTo ? ` (عمولة ${v.commissionTo})` : ""}`,
+          description: `لكم من حساب ${nameOf(v.clientId)}${v.commissionTo ? ` (عمولة ${v.commissionTo})` : ""}${note}`,
           typeLabel: "قيد بسيط (دائن)",
           debit: 0, credit: v.amount + (v.commissionTo || 0), currency: cur,
         });

@@ -32,9 +32,17 @@ export function buildVoucherMessage(v: Voucher, role: "from" | "to" = "from"): s
   // For compound: "from" client is مدين (عليه), "to" client is دائن (له)
   let label = voucherTypeLabels[v.type];
   let commission = v.commission || 0;
+  let compoundLine = "";
   if (isCompound) {
-    if (role === "from") { label = "قيد بسيط — مدين (عليه)"; commission = v.commission || 0; }
-    else { label = "قيد بسيط — دائن (له)"; commission = v.commissionTo || 0; }
+    if (role === "from") {
+      label = "قيد بسيط — مدين (عليه)";
+      commission = v.commission || 0;
+      compoundLine = other ? `📝 البيان: عليكم إلى حساب ${other.name}` : "";
+    } else {
+      label = "قيد بسيط — دائن (له)";
+      commission = v.commissionTo || 0;
+      compoundLine = other ? `📝 البيان: لكم من حساب ${other.name}` : "";
+    }
   }
   const lines = [
     `📄 *إشعار سند*`,
@@ -46,7 +54,7 @@ export function buildVoucherMessage(v: Voucher, role: "from" | "to" = "from"): s
     isCompound && other ? `🔁 الطرف الآخر: ${other.name}` : "",
     `💵 المبلغ: ${formatCurrency(v.amount, cur)}`,
     commission ? `➕ العمولة: ${formatCurrency(commission, cur)}` : "",
-    v.description ? `📝 البيان: ${v.description}` : "",
+    isCompound ? [compoundLine, v.description ? `🗒️ ملاحظات: ${v.description}` : ""].filter(Boolean).join("\n") : (v.description ? `📝 البيان: ${v.description}` : ""),
     bals ? `📊 الرصيد الحالي: ${formatCurrency(Math.abs(bal), cur)} ${bal >= 0 ? "لكم" : "عليكم"}` : "",
     ``,
     `شكراً لتعاملكم معنا 🌹`,
