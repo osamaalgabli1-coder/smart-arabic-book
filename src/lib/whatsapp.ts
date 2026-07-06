@@ -18,14 +18,24 @@ function fmtDateTime(d: string): string {
   return `${d} ${hh}:${mm}`;
 }
 
-export function buildVoucherMessage(v: Voucher): string {
+export function buildVoucherMessage(v: Voucher, role: "from" | "to" = "from"): string {
   const s = getState();
   const company = s.company.name;
-  const client = s.clients.find((c) => c.id === v.clientId);
-  const bals = v.clientId ? clientBalances(s, v.clientId) : null;
+  const isCompound = v.type === "compound";
+  const targetId = role === "to" ? v.toClientId : v.clientId;
+  const otherId = role === "to" ? v.clientId : v.toClientId;
+  const client = s.clients.find((c) => c.id === targetId);
+  const other = s.clients.find((c) => c.id === otherId);
+  const bals = targetId ? clientBalances(s, targetId) : null;
   const cur: Currency = v.currency;
   const bal = bals ? bals[cur] : 0;
-  const label = voucherTypeLabels[v.type];
+  // For compound: "from" client is مدين (عليه), "to" client is دائن (له)
+  let label = voucherTypeLabels[v.type];
+  let commission = v.commission || 0;
+  if (isCompound) {
+    if (role === "from") { label = "قيد بسيط — مدين (عليه)"; commission = v.commission || 0; }
+    else { label = "قيد بسيط — دائن (له)"; commission = v.commissionTo || 0; }
+  }
   const lines = [
     `📄 *إشعار سند*`,
     `🏢 الشركة: ${company}`,
@@ -33,8 +43,9 @@ export function buildVoucherMessage(v: Voucher): string {
     `🧾 رقم السند: ${v.number}`,
     `📅 التاريخ: ${fmtDateTime(v.date)}`,
     `⚙️ نوع العملية: ${label}`,
+    isCompound && other ? `🔁 الطرف الآخر: ${other.name}` : "",
     `💵 المبلغ: ${formatCurrency(v.amount, cur)}`,
-    v.commission ? `➕ العمولة: ${formatCurrency(v.commission, cur)}` : "",
+    commission ? `➕ العمولة: ${formatCurrency(commission, cur)}` : "",
     v.description ? `📝 البيان: ${v.description}` : "",
     bals ? `📊 الرصيد الحالي: ${formatCurrency(Math.abs(bal), cur)} ${bal >= 0 ? "لكم" : "عليكم"}` : "",
     ``,
