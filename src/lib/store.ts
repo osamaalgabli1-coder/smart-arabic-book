@@ -87,6 +87,11 @@ export type Company = {
 
 export type AppSettings = {
   whatsappAutoSend: boolean;
+  smsNotifications?: boolean;
+  telegramBotToken?: string;
+  telegramChatId?: string;
+  passwordEnabled?: boolean;
+  password?: string;
 };
 
 export type AppState = {
@@ -106,7 +111,7 @@ const initialState: AppState = {
   vouchers: [],
   transfers: [],
   company: { name: "شركتي" },
-  settings: { whatsappAutoSend: false },
+  settings: { whatsappAutoSend: false, smsNotifications: false, passwordEnabled: false },
 };
 
 let state: AppState = load();
