@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, Phone, Contact, MessageCircle } from "lucide-react";
 import { setState, useAppState, uid, clientBalance, formatCurrency, type Client } from "@/lib/store";
-import { buildBalanceMessage, sendWhatsapp } from "@/lib/whatsapp";
+import { buildBalanceMessage, sendWhatsapp, maybeSendSMS } from "@/lib/whatsapp";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/clients")({ component: ClientsPage });
@@ -52,7 +52,11 @@ function ClientsPage() {
                   {formatCurrency(bal)}
                 </div>
                 <div className="flex gap-1">
-                  <Button size="icon" variant="ghost" title="إرسال إجمالي الرصيد واتساب" onClick={() => sendWhatsapp(c.phone, buildBalanceMessage(c.id))}>
+                  <Button size="icon" variant="ghost" title="إرسال إجمالي الرصيد" onClick={() => {
+                    const msg = buildBalanceMessage(c.id);
+                    sendWhatsapp(c.phone, msg);
+                    maybeSendSMS(c.phone, msg);
+                  }}>
                     <MessageCircle className="w-4 h-4 text-success" />
                   </Button>
                   <Button size="icon" variant="ghost" onClick={() => startEdit(c)}><Pencil className="w-4 h-4" /></Button>
