@@ -1,4 +1,4 @@
-import { getState, formatCurrency, voucherTypeLabels, clientBalances, type Voucher, type Transfer, type Currency } from "@/lib/store";
+import { getState, formatCurrency, voucherTypeLabels, clientBalances, companyDisplayName, CURRENCIES, type Voucher, type Transfer, type Currency } from "@/lib/store";
 import { toast } from "sonner";
 
 function normPhone(p?: string): string {
@@ -20,7 +20,7 @@ function fmtDateTime(d: string): string {
 
 export function buildVoucherMessage(v: Voucher, role: "from" | "to" = "from"): string {
   const s = getState();
-  const company = s.company.name;
+  const company = companyDisplayName(s);
   const isCompound = v.type === "compound";
   const targetId = role === "to" ? v.toClientId : v.clientId;
   const otherId = role === "to" ? v.clientId : v.toClientId;
@@ -46,7 +46,7 @@ export function buildVoucherMessage(v: Voucher, role: "from" | "to" = "from"): s
   }
   const lines = [
     `📄 *إشعار سند*`,
-    `🏢 الشركة: ${company}`,
+    `${company}`,
     client ? `👤 العميل: ${client.name}` : "",
     `🧾 رقم السند: ${v.number}`,
     `📅 التاريخ: ${fmtDateTime(v.date)}`,
@@ -69,7 +69,7 @@ export function buildTransferMessage(t: Transfer): string {
   const bal = bals ? bals[t.currency] : 0;
   const lines = [
     `📄 *إشعار حوالة*`,
-    `🏢 الشركة: ${s.company.name}`,
+    `${companyDisplayName(s)}`,
     client ? `👤 العميل: ${client.name}` : "",
     `🧾 رقم الحوالة: ${t.number}`,
     `📅 التاريخ: ${fmtDateTime(t.date)}`,
@@ -97,10 +97,51 @@ export function sendWhatsapp(phone: string | undefined, message: string, opts?: 
   return true;
 }
 
+// رسالة إجمالي رصيد العميل — مدين عليكم / دائن لكم
+export function buildBalanceMessage(clientId: string): string {
+  const s = getState();
+  const client = s.clients.find((c) => c.id === clientId);
+  const bals = clientBalances(s, clientId);
+  const parts: string[] = [];
+  let anyCredit = false, anyDebit = false;
+  for (const cur of CURRENCIES) {
+    const b = bals[cur];
+    if (!b) continue;
+    if (b > 0) anyCredit = true; else anyDebit = true;
+    parts.push(`• ${formatCurrency(Math.abs(b), cur)} ${b > 0 ? "لكم" : "عليكم"}`);
+  }
+  const head = anyCredit && !anyDebit ? "إشعار دائن — لكم" : (!anyCredit && anyDebit ? "إشعار مدين — عليكم" : "إشعار رصيد");
+  const lines = [
+    `📄 *${head}*`,
+    `${companyDisplayName(s)}`,
+    client ? `👤 العميل: ${client.name}` : "",
+    `📅 التاريخ: ${fmtDateTime(new Date().toISOString().slice(0, 10))}`,
+    `📊 *إجمالي الرصيد:*`,
+    parts.length ? parts.join("\n") : "• لا يوجد رصيد",
+    ``,
+    `شكراً لتعاملكم معنا 🌹`,
+  ].filter(Boolean);
+  return lines.join("\n");
+}
+
 export function maybeAutoSend(phone: string | undefined, message: string): void {
   const auto = getState().settings.whatsappAutoSend;
   if (!auto) return;
   if (!phone) return;
   if (!confirm("إرسال إشعار واتساب للعميل الآن؟")) return;
   sendWhatsapp(phone, message);
+}
+
+// إرسال عبر الرسائل النصية (SMS) عند تفعيلها في الإعدادات
+export function sendSMS(phone: string | undefined, message: string): boolean {
+  const p = normPhone(phone);
+  if (!p) { toast.error("لا يوجد رقم هاتف للعميل"); return false; }
+  window.location.href = `sms:+${p}?body=${encodeURIComponent(message)}`;
+  return true;
+}
+
+export function maybeSendSMS(phone: string | undefined, message: string): void {
+  if (!getState().settings.smsNotifications) return;
+  if (!phone) return;
+  sendSMS(phone, message);
 }

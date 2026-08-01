@@ -2,9 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
-import { Share2, Users, User, Download, FileDown } from "lucide-react";
+import { Share2, Users, User, Download, FileDown, MessageCircle, TrendingUp, TrendingDown } from "lucide-react";
 import { useAppState, getState, clientBalance, formatCurrency } from "@/lib/store";
-import { openStatementPDF, downloadStatementHTML, downloadStatementPDF } from "@/lib/statement-pdf";
+import { openStatementPDF, downloadStatementHTML, downloadStatementPDF, sendClientStatementToWhatsapp } from "@/lib/statement-pdf";
+import { sendWhatsapp, buildBalanceMessage } from "@/lib/whatsapp";
 import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -87,6 +88,39 @@ function ExportPage() {
             catch (e) { toast.error("تعذّر إنشاء PDF"); console.error(e); }
           }} />
           <Btn icon={<Share2 />} label="مشاركة عبر واتساب" onClick={shareWhatsapp} />
+          <Btn icon={<MessageCircle />} label="إرسال كشف العميل PDF إلى واتساب العميل" onClick={async () => {
+            const c = state.clients.find((x) => x.id === clientId);
+            if (!c) { toast.error("اختر عميلاً"); return; }
+            toast.info("جاري تجهيز الكشف...");
+            try {
+              const r = await sendClientStatementToWhatsapp(c.id);
+              if (r === "shared") { toast.success("تمت المشاركة"); return; }
+              toast.success("تم تنزيل الكشف — أرفقه في محادثة واتساب");
+              sendWhatsapp(c.phone, buildBalanceMessage(c.id));
+            } catch (e) { toast.error("تعذّر إنشاء PDF"); console.error(e); }
+          }} />
+        </div>
+      </section>
+
+      <section className="mt-6">
+        <h3 className="font-bold text-primary mb-3 text-sm">تصدير حسب نوع الرصيد</h3>
+        <div className="grid sm:grid-cols-2 gap-3">
+          <Btn icon={<TrendingUp />} label="PDF — كل العملاء دائن (له)" onClick={async () => {
+            const s = getState();
+            const ids = s.clients.filter((c) => clientBalance(s, c.id) > 0).map((c) => c.id);
+            if (!ids.length) { toast.error("لا يوجد عملاء دائنون"); return; }
+            toast.info("جاري إنشاء ملف PDF...");
+            try { await downloadStatementPDF(ids, { title: "كشف-العملاء-الدائنين-له" }); toast.success("تم التنزيل"); }
+            catch (e) { toast.error("تعذّر إنشاء PDF"); console.error(e); }
+          }} />
+          <Btn icon={<TrendingDown />} label="PDF — كل العملاء مدين (عليه)" onClick={async () => {
+            const s = getState();
+            const ids = s.clients.filter((c) => clientBalance(s, c.id) < 0).map((c) => c.id);
+            if (!ids.length) { toast.error("لا يوجد عملاء مدينون"); return; }
+            toast.info("جاري إنشاء ملف PDF...");
+            try { await downloadStatementPDF(ids, { title: "كشف-العملاء-المدينين-عليه" }); toast.success("تم التنزيل"); }
+            catch (e) { toast.error("تعذّر إنشاء PDF"); console.error(e); }
+          }} />
         </div>
       </section>
 

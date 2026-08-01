@@ -87,6 +87,11 @@ export type Company = {
 
 export type AppSettings = {
   whatsappAutoSend: boolean;
+  smsNotifications?: boolean;
+  telegramBotToken?: string;
+  telegramChatId?: string;
+  passwordEnabled?: boolean;
+  password?: string;
 };
 
 export type AppState = {
@@ -106,7 +111,7 @@ const initialState: AppState = {
   vouchers: [],
   transfers: [],
   company: { name: "شركتي" },
-  settings: { whatsappAutoSend: false },
+  settings: { whatsappAutoSend: false, smsNotifications: false, passwordEnabled: false },
 };
 
 let state: AppState = load();
@@ -216,6 +221,11 @@ export function cashboxBalance(state: AppState, cashboxId: string): number {
 
 export function formatNumber(n: number): string {
   return new Intl.NumberFormat("ar", { maximumFractionDigits: 2 }).format(n);
+}
+
+// اسم الشركة في الإشعارات: نجمة قبل وبعد الاسم بدون كلمة "الشركة"
+export function companyDisplayName(state: AppState): string {
+  return `✦ ${state.company.name} ✦`;
 }
 
 export function formatCurrency(n: number, currency: Currency = "YER"): string {

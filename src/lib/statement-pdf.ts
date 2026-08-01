@@ -35,6 +35,9 @@ function renderClientBlock(client: Client, opts: { from?: string; to?: string })
     <div class="cur-block">
       <div class="cur-title">${currencyLabels[cur]} (${currencySymbols[cur]})</div>
       <table>
+        <colgroup>
+          <col class="c-date"><col class="c-num"><col class="c-desc"><col class="c-deb"><col class="c-cre"><col class="c-bal">
+        </colgroup>
         <thead>
           <tr><th>التاريخ</th><th>رقم السند</th><th>التفاصيل</th><th>عليه</th><th>له</th><th>الرصيد</th></tr>
         </thead>
@@ -95,10 +98,10 @@ function buildStatementHTML(clientIds: string[], opts: { from?: string; to?: str
 <style>
   @page { size: A4; margin: 12mm; }
   * { box-sizing: border-box; }
-  body { font-family: "Amiri","Tajawal","Cairo","Segoe UI",Arial,sans-serif; color:#111; margin:0; letter-spacing: 0.03em; word-spacing: 0.12em; }
-  table, th, td { letter-spacing: 0.04em; word-spacing: 0.14em; }
-  .statement-title, .co-name, .cur-title { letter-spacing: 0.06em; }
-  .client { padding: 8px 0; }
+  html, body { letter-spacing: normal; }
+  body { font-family: "Tajawal","Cairo","Amiri","Segoe UI",Arial,sans-serif; color:#111; margin:0; width: 186mm; letter-spacing: 0 !important; word-spacing: 0.06em; -webkit-font-smoothing: antialiased; }
+  table, th, td, div, span, h2 { letter-spacing: 0 !important; word-spacing: 0.06em; }
+  .client { padding: 6px 0; width: 186mm; }
   .page-break { page-break-after: always; }
   .page-header { display:flex; justify-content:space-between; align-items:flex-start; border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 10px; }
   .page-header .right { text-align: left; font-size: 12px; color:#333; }
@@ -109,8 +112,16 @@ function buildStatementHTML(clientIds: string[], opts: { from?: string; to?: str
   .meta { text-align:center; font-size: 12px; color:#444; margin-bottom: 8px; }
   .cur-block { margin-top: 10px; }
   .cur-title { background:#eef3fb; color:#1a4b8f; font-weight:800; padding:6px 10px; border:1px solid #cfd8ea; border-bottom:none; border-radius:6px 6px 0 0; font-size: 13px; }
-  table { width:100%; border-collapse: collapse; font-size: 12px; }
-  th, td { border: 1px solid #bbb; padding: 6px 8px; text-align: center; }
+  table { width:100%; table-layout: fixed; border-collapse: collapse; font-size: 11.5px; }
+  col.c-date { width: 17%; }
+  col.c-num { width: 9%; }
+  col.c-desc { width: 30%; }
+  col.c-deb { width: 13%; }
+  col.c-cre { width: 13%; }
+  col.c-bal { width: 18%; }
+  th, td { border: 1px solid #999; padding: 5px 4px; text-align: center; overflow-wrap: anywhere; word-break: break-word; vertical-align: middle; }
+  td:first-child { white-space: nowrap; font-size: 11px; }
+  td.ltxt { font-size: 10.5px; line-height: 1.45; }
   th { background: #e9e9e9; color:#111; font-weight:700; }
   td.ltxt { text-align: right; }
   td.deb { color:#c0392b; font-weight:700; }
@@ -164,31 +175,31 @@ function triggerDownload(name: string, blob: Blob) {
 
 function fileDate() { return new Date().toISOString().slice(0, 10); }
 
-export async function downloadStatementPDF(clientIds: string[], opts: { from?: string; to?: string; title?: string } = {}) {
+async function buildStatementPDFDoc(clientIds: string[], opts: { from?: string; to?: string; title?: string } = {}) {
   const html = buildStatementHTML(clientIds, opts);
   const iframe = document.createElement("iframe");
   iframe.style.position = "fixed";
   iframe.style.left = "-10000px";
   iframe.style.top = "0";
-  iframe.style.width = "800px";
-  iframe.style.height = "1200px";
+  iframe.style.width = "760px";
+  iframe.style.height = "1400px";
   document.body.appendChild(iframe);
   const doc = iframe.contentDocument!;
   doc.open(); doc.write(html); doc.close();
-  await new Promise((r) => setTimeout(r, 400));
+  await new Promise((r) => setTimeout(r, 600));
   const body = doc.body;
-  const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+  const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
   const pdfW = pdf.internal.pageSize.getWidth();
   const pdfH = pdf.internal.pageSize.getHeight();
   const sections = Array.from(body.querySelectorAll<HTMLElement>("section.client"));
   const targets = sections.length ? sections : [body];
   for (let i = 0; i < targets.length; i++) {
-    const canvas = await html2canvas(targets[i], { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
-    const img = canvas.toDataURL("image/jpeg", 0.92);
+    const canvas = await html2canvas(targets[i], { scale: 3, useCORS: true, backgroundColor: "#ffffff" });
+    const img = canvas.toDataURL("image/png");
     const imgH = (canvas.height * pdfW) / canvas.width;
     if (imgH <= pdfH) {
       if (i > 0) pdf.addPage();
-      pdf.addImage(img, "JPEG", 0, 0, pdfW, imgH);
+      pdf.addImage(img, "PNG", 0, 0, pdfW, imgH, undefined, "FAST");
     } else {
       // paginate a single tall section
       const pageCanvasH = (canvas.width * pdfH) / pdfW;
@@ -200,17 +211,41 @@ export async function downloadStatementPDF(clientIds: string[], opts: { from?: s
         const ctx = c2.getContext("2d")!;
         ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, c2.width, c2.height);
         ctx.drawImage(canvas, 0, y, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
-        const slice = c2.toDataURL("image/jpeg", 0.92);
+        const slice = c2.toDataURL("image/png");
         if (!first || i > 0) pdf.addPage();
         first = false;
-        pdf.addImage(slice, "JPEG", 0, 0, pdfW, (sliceH * pdfW) / canvas.width);
+        pdf.addImage(slice, "PNG", 0, 0, pdfW, (sliceH * pdfW) / canvas.width, undefined, "FAST");
         y += sliceH;
       }
     }
   }
   document.body.removeChild(iframe);
+  return pdf;
+}
+
+export async function downloadStatementPDF(clientIds: string[], opts: { from?: string; to?: string; title?: string } = {}) {
+  const pdf = await buildStatementPDFDoc(clientIds, opts);
   const name = (opts.title ?? "كشف-حساب") + "-" + fileDate() + ".pdf";
   pdf.save(name);
+}
+
+// إنشاء ملف PDF ومشاركته مباشرة إلى واتساب رقم العميل (مع تنزيل احتياطي)
+export async function sendClientStatementToWhatsapp(clientId: string, opts: { from?: string; to?: string } = {}) {
+  const s = getState();
+  const client = s.clients.find((c) => c.id === clientId);
+  if (!client) throw new Error("no client");
+  const title = `كشف-حساب-${client.name}`;
+  const pdf = await buildStatementPDFDoc([clientId], { ...opts, title });
+  const fileName = `${title}-${fileDate()}.pdf`;
+  const blob = pdf.output("blob");
+  const file = new File([blob], fileName, { type: "application/pdf" });
+  const nav = navigator as Navigator & { canShare?: (d: { files?: File[] }) => boolean };
+  if (nav.share && nav.canShare?.({ files: [file] })) {
+    await nav.share({ files: [file], title, text: `كشف حساب — ${client.name}` });
+    return "shared" as const;
+  }
+  triggerDownload(fileName, blob);
+  return "downloaded" as const;
 }
 
 export function downloadStatementJSON(clientIds: string[], opts: { from?: string; to?: string; title?: string; mode?: "detailed" | "summary" } = {}) {
