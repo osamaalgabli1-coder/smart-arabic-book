@@ -1,4 +1,4 @@
-import { getState, formatCurrency, voucherTypeLabels, clientBalances, type Voucher, type Transfer, type Currency } from "@/lib/store";
+import { getState, formatCurrency, voucherTypeLabels, clientBalances, companyDisplayName, CURRENCIES, type Voucher, type Transfer, type Currency } from "@/lib/store";
 import { toast } from "sonner";
 
 function normPhone(p?: string): string {
@@ -20,7 +20,7 @@ function fmtDateTime(d: string): string {
 
 export function buildVoucherMessage(v: Voucher, role: "from" | "to" = "from"): string {
   const s = getState();
-  const company = s.company.name;
+  const company = companyDisplayName(s);
   const isCompound = v.type === "compound";
   const targetId = role === "to" ? v.toClientId : v.clientId;
   const otherId = role === "to" ? v.clientId : v.toClientId;
@@ -46,7 +46,7 @@ export function buildVoucherMessage(v: Voucher, role: "from" | "to" = "from"): s
   }
   const lines = [
     `📄 *إشعار سند*`,
-    `🏢 الشركة: ${company}`,
+    `${company}`,
     client ? `👤 العميل: ${client.name}` : "",
     `🧾 رقم السند: ${v.number}`,
     `📅 التاريخ: ${fmtDateTime(v.date)}`,
@@ -69,7 +69,7 @@ export function buildTransferMessage(t: Transfer): string {
   const bal = bals ? bals[t.currency] : 0;
   const lines = [
     `📄 *إشعار حوالة*`,
-    `🏢 الشركة: ${s.company.name}`,
+    `${companyDisplayName(s)}`,
     client ? `👤 العميل: ${client.name}` : "",
     `🧾 رقم الحوالة: ${t.number}`,
     `📅 التاريخ: ${fmtDateTime(t.date)}`,
