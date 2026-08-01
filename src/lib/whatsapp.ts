@@ -131,3 +131,17 @@ export function maybeAutoSend(phone: string | undefined, message: string): void 
   if (!confirm("إرسال إشعار واتساب للعميل الآن؟")) return;
   sendWhatsapp(phone, message);
 }
+
+// إرسال عبر الرسائل النصية (SMS) عند تفعيلها في الإعدادات
+export function sendSMS(phone: string | undefined, message: string): boolean {
+  const p = normPhone(phone);
+  if (!p) { toast.error("لا يوجد رقم هاتف للعميل"); return false; }
+  window.location.href = `sms:+${p}?body=${encodeURIComponent(message)}`;
+  return true;
+}
+
+export function maybeSendSMS(phone: string | undefined, message: string): void {
+  if (!getState().settings.smsNotifications) return;
+  if (!phone) return;
+  sendSMS(phone, message);
+}
