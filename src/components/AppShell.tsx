@@ -1,8 +1,11 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, Home, Users, Wallet, FileText, Send, BarChart3, Settings, Download, Upload, Building2, X, MessageCircle, Phone } from "lucide-react";
+import { Menu, Home, Users, Wallet, FileText, Send, BarChart3, Settings, Download, Upload, Building2, X, MessageCircle, Phone, HardDriveUpload, Lock } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { useAppState } from "@/lib/store";
 import { cn } from "@/lib/utils";
+import { LockGate, lockApp } from "@/components/LockGate";
+import { googleDriveBackup } from "@/lib/gdrive";
+import { toast } from "sonner";
 
 const menu = [
   { to: "/", label: "الرئيسية", icon: Home },
@@ -22,8 +25,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const path = useRouterState({ select: (s) => s.location.pathname });
   const company = useAppState((s) => s.company);
+  const lockEnabled = useAppState((s) => Boolean(s.settings.passwordEnabled && s.settings.password));
 
   return (
+    <LockGate>
     <div className="min-h-screen bg-background text-foreground pb-24">
       <header className="sticky top-0 z-30 bg-header text-header-foreground shadow-md">
         <div className="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
@@ -97,6 +102,23 @@ export function AppShell({ children }: { children: ReactNode }) {
                 );
               })}
               <div className="my-2 border-t border-border" />
+              <button
+                onClick={() => { googleDriveBackup(); setOpen(false); toast.success("تم تنزيل النسخة — اسحبها إلى جوجل درايف"); }}
+                className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg text-sm hover:bg-muted"
+              >
+                <span>نسخة احتياطية إلى جوجل درايف</span>
+                <HardDriveUpload className="w-5 h-5 text-primary" />
+              </button>
+              {lockEnabled && (
+                <button
+                  onClick={() => lockApp()}
+                  className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg text-sm hover:bg-muted"
+                >
+                  <span>قفل التطبيق</span>
+                  <Lock className="w-5 h-5 text-primary" />
+                </button>
+              )}
+              <div className="my-2 border-t border-border" />
               <div className="px-4 pt-2 pb-1 text-[11px] font-bold text-muted-foreground">تواصل معنا</div>
               <a
                 href="https://wa.me/967772184441"
@@ -121,5 +143,6 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       )}
     </div>
+    </LockGate>
   );
 }
