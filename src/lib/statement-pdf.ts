@@ -98,10 +98,10 @@ function buildStatementHTML(clientIds: string[], opts: { from?: string; to?: str
 <style>
   @page { size: A4; margin: 12mm; }
   * { box-sizing: border-box; }
-  body { font-family: "Amiri","Tajawal","Cairo","Segoe UI",Arial,sans-serif; color:#111; margin:0; letter-spacing: 0.03em; word-spacing: 0.12em; }
-  table, th, td { letter-spacing: 0.04em; word-spacing: 0.14em; }
-  .statement-title, .co-name, .cur-title { letter-spacing: 0.06em; }
-  .client { padding: 8px 0; }
+  html, body { letter-spacing: normal; }
+  body { font-family: "Tajawal","Cairo","Amiri","Segoe UI",Arial,sans-serif; color:#111; margin:0; width: 186mm; letter-spacing: 0 !important; word-spacing: 0.06em; -webkit-font-smoothing: antialiased; }
+  table, th, td, div, span, h2 { letter-spacing: 0 !important; word-spacing: 0.06em; }
+  .client { padding: 6px 0; width: 186mm; }
   .page-break { page-break-after: always; }
   .page-header { display:flex; justify-content:space-between; align-items:flex-start; border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 10px; }
   .page-header .right { text-align: left; font-size: 12px; color:#333; }
@@ -112,8 +112,16 @@ function buildStatementHTML(clientIds: string[], opts: { from?: string; to?: str
   .meta { text-align:center; font-size: 12px; color:#444; margin-bottom: 8px; }
   .cur-block { margin-top: 10px; }
   .cur-title { background:#eef3fb; color:#1a4b8f; font-weight:800; padding:6px 10px; border:1px solid #cfd8ea; border-bottom:none; border-radius:6px 6px 0 0; font-size: 13px; }
-  table { width:100%; border-collapse: collapse; font-size: 12px; }
-  th, td { border: 1px solid #bbb; padding: 6px 8px; text-align: center; }
+  table { width:100%; table-layout: fixed; border-collapse: collapse; font-size: 11.5px; }
+  col.c-date { width: 17%; }
+  col.c-num { width: 9%; }
+  col.c-desc { width: 30%; }
+  col.c-deb { width: 13%; }
+  col.c-cre { width: 13%; }
+  col.c-bal { width: 18%; }
+  th, td { border: 1px solid #999; padding: 5px 4px; text-align: center; overflow-wrap: anywhere; word-break: break-word; vertical-align: middle; }
+  td:first-child { white-space: nowrap; font-size: 11px; }
+  td.ltxt { font-size: 10.5px; line-height: 1.45; }
   th { background: #e9e9e9; color:#111; font-weight:700; }
   td.ltxt { text-align: right; }
   td.deb { color:#c0392b; font-weight:700; }
