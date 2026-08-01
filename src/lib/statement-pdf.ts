@@ -175,31 +175,31 @@ function triggerDownload(name: string, blob: Blob) {
 
 function fileDate() { return new Date().toISOString().slice(0, 10); }
 
-export async function downloadStatementPDF(clientIds: string[], opts: { from?: string; to?: string; title?: string } = {}) {
+async function buildStatementPDFDoc(clientIds: string[], opts: { from?: string; to?: string; title?: string } = {}) {
   const html = buildStatementHTML(clientIds, opts);
   const iframe = document.createElement("iframe");
   iframe.style.position = "fixed";
   iframe.style.left = "-10000px";
   iframe.style.top = "0";
-  iframe.style.width = "800px";
-  iframe.style.height = "1200px";
+  iframe.style.width = "760px";
+  iframe.style.height = "1400px";
   document.body.appendChild(iframe);
   const doc = iframe.contentDocument!;
   doc.open(); doc.write(html); doc.close();
-  await new Promise((r) => setTimeout(r, 400));
+  await new Promise((r) => setTimeout(r, 600));
   const body = doc.body;
-  const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+  const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
   const pdfW = pdf.internal.pageSize.getWidth();
   const pdfH = pdf.internal.pageSize.getHeight();
   const sections = Array.from(body.querySelectorAll<HTMLElement>("section.client"));
   const targets = sections.length ? sections : [body];
   for (let i = 0; i < targets.length; i++) {
-    const canvas = await html2canvas(targets[i], { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
-    const img = canvas.toDataURL("image/jpeg", 0.92);
+    const canvas = await html2canvas(targets[i], { scale: 3, useCORS: true, backgroundColor: "#ffffff" });
+    const img = canvas.toDataURL("image/png");
     const imgH = (canvas.height * pdfW) / canvas.width;
     if (imgH <= pdfH) {
       if (i > 0) pdf.addPage();
-      pdf.addImage(img, "JPEG", 0, 0, pdfW, imgH);
+      pdf.addImage(img, "PNG", 0, 0, pdfW, imgH, undefined, "FAST");
     } else {
       // paginate a single tall section
       const pageCanvasH = (canvas.width * pdfH) / pdfW;
@@ -211,17 +211,41 @@ export async function downloadStatementPDF(clientIds: string[], opts: { from?: s
         const ctx = c2.getContext("2d")!;
         ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, c2.width, c2.height);
         ctx.drawImage(canvas, 0, y, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
-        const slice = c2.toDataURL("image/jpeg", 0.92);
+        const slice = c2.toDataURL("image/png");
         if (!first || i > 0) pdf.addPage();
         first = false;
-        pdf.addImage(slice, "JPEG", 0, 0, pdfW, (sliceH * pdfW) / canvas.width);
+        pdf.addImage(slice, "PNG", 0, 0, pdfW, (sliceH * pdfW) / canvas.width, undefined, "FAST");
         y += sliceH;
       }
     }
   }
   document.body.removeChild(iframe);
+  return pdf;
+}
+
+export async function downloadStatementPDF(clientIds: string[], opts: { from?: string; to?: string; title?: string } = {}) {
+  const pdf = await buildStatementPDFDoc(clientIds, opts);
   const name = (opts.title ?? "كشف-حساب") + "-" + fileDate() + ".pdf";
   pdf.save(name);
+}
+
+// إنشاء ملف PDF ومشاركته مباشرة إلى واتساب رقم العميل (مع تنزيل احتياطي)
+export async function sendClientStatementToWhatsapp(clientId: string, opts: { from?: string; to?: string } = {}) {
+  const s = getState();
+  const client = s.clients.find((c) => c.id === clientId);
+  if (!client) throw new Error("no client");
+  const title = `كشف-حساب-${client.name}`;
+  const pdf = await buildStatementPDFDoc([clientId], { ...opts, title });
+  const fileName = `${title}-${fileDate()}.pdf`;
+  const blob = pdf.output("blob");
+  const file = new File([blob], fileName, { type: "application/pdf" });
+  const nav = navigator as Navigator & { canShare?: (d: { files?: File[] }) => boolean };
+  if (nav.share && nav.canShare?.({ files: [file] })) {
+    await nav.share({ files: [file], title, text: `كشف حساب — ${client.name}` });
+    return "shared" as const;
+  }
+  triggerDownload(fileName, blob);
+  return "downloaded" as const;
 }
 
 export function downloadStatementJSON(clientIds: string[], opts: { from?: string; to?: string; title?: string; mode?: "detailed" | "summary" } = {}) {
