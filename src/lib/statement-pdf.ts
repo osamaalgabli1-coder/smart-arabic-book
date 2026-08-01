@@ -35,6 +35,9 @@ function renderClientBlock(client: Client, opts: { from?: string; to?: string })
     <div class="cur-block">
       <div class="cur-title">${currencyLabels[cur]} (${currencySymbols[cur]})</div>
       <table>
+        <colgroup>
+          <col class="c-date"><col class="c-num"><col class="c-desc"><col class="c-deb"><col class="c-cre"><col class="c-bal">
+        </colgroup>
         <thead>
           <tr><th>التاريخ</th><th>رقم السند</th><th>التفاصيل</th><th>عليه</th><th>له</th><th>الرصيد</th></tr>
         </thead>
