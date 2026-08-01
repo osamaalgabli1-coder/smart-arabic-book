@@ -223,6 +223,11 @@ export function formatNumber(n: number): string {
   return new Intl.NumberFormat("ar", { maximumFractionDigits: 2 }).format(n);
 }
 
+// اسم الشركة في الإشعارات: نجمة قبل وبعد الاسم بدون كلمة "الشركة"
+export function companyDisplayName(state: AppState): string {
+  return `✦ ${state.company.name} ✦`;
+}
+
 export function formatCurrency(n: number, currency: Currency = "YER"): string {
   return `${formatNumber(n)} ${currencySymbols[currency]}`;
 }
