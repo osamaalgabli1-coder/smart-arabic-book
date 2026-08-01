@@ -124,17 +124,6 @@ export function buildBalanceMessage(clientId: string): string {
   return lines.join("\n");
 }
 
-function _unusedSendWhatsapp(phone: string | undefined, message: string, opts?: { silent?: boolean }) {
-  const p = normPhone(phone);
-  if (!p) {
-    if (!opts?.silent) toast.error("لا يوجد رقم واتساب للعميل");
-    return false;
-  }
-  const url = `https://wa.me/${p}?text=${encodeURIComponent(message)}`;
-  window.open(url, "_blank");
-  return true;
-}
-
 export function maybeAutoSend(phone: string | undefined, message: string): void {
   const auto = getState().settings.whatsappAutoSend;
   if (!auto) return;
