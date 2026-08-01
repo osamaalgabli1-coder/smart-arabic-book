@@ -97,6 +97,44 @@ export function sendWhatsapp(phone: string | undefined, message: string, opts?: 
   return true;
 }
 
+// رسالة إجمالي رصيد العميل — مدين عليكم / دائن لكم
+export function buildBalanceMessage(clientId: string): string {
+  const s = getState();
+  const client = s.clients.find((c) => c.id === clientId);
+  const bals = clientBalances(s, clientId);
+  const parts: string[] = [];
+  let anyCredit = false, anyDebit = false;
+  for (const cur of CURRENCIES) {
+    const b = bals[cur];
+    if (!b) continue;
+    if (b > 0) anyCredit = true; else anyDebit = true;
+    parts.push(`• ${formatCurrency(Math.abs(b), cur)} ${b > 0 ? "لكم" : "عليكم"}`);
+  }
+  const head = anyCredit && !anyDebit ? "إشعار دائن — لكم" : (!anyCredit && anyDebit ? "إشعار مدين — عليكم" : "إشعار رصيد");
+  const lines = [
+    `📄 *${head}*`,
+    `${companyDisplayName(s)}`,
+    client ? `👤 العميل: ${client.name}` : "",
+    `📅 التاريخ: ${fmtDateTime(new Date().toISOString().slice(0, 10))}`,
+    `📊 *إجمالي الرصيد:*`,
+    parts.length ? parts.join("\n") : "• لا يوجد رصيد",
+    ``,
+    `شكراً لتعاملكم معنا 🌹`,
+  ].filter(Boolean);
+  return lines.join("\n");
+}
+
+function _unusedSendWhatsapp(phone: string | undefined, message: string, opts?: { silent?: boolean }) {
+  const p = normPhone(phone);
+  if (!p) {
+    if (!opts?.silent) toast.error("لا يوجد رقم واتساب للعميل");
+    return false;
+  }
+  const url = `https://wa.me/${p}?text=${encodeURIComponent(message)}`;
+  window.open(url, "_blank");
+  return true;
+}
+
 export function maybeAutoSend(phone: string | undefined, message: string): void {
   const auto = getState().settings.whatsappAutoSend;
   if (!auto) return;
