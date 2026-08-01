@@ -3,8 +3,10 @@ import { useRef } from "react";
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
-import { Download, Upload, Send } from "lucide-react";
+import { Download, Upload, Send, HardDriveUpload } from "lucide-react";
 import { getState, setState, type AppState } from "@/lib/store";
+import { telegramBackup, telegramRestore, telegramReady } from "@/lib/telegram";
+import { googleDriveBackup } from "@/lib/gdrive";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/backup")({ component: BackupPage });
@@ -46,11 +48,25 @@ function BackupPage() {
           <input ref={fileRef} type="file" accept="application/json" className="hidden" onChange={(e) => e.target.files?.[0] && restore(e.target.files[0])} />
           <Button variant="secondary" onClick={() => fileRef.current?.click()} className="w-full">اختيار ملف</Button>
         </Card>
-        <Card icon={<Send className="w-6 h-6" />} title="نسخة احتياطية إلى تيليجرام" desc="سيتم دمج بوت تيليجرام لاحقاً">
-          <Button disabled variant="outline" className="w-full">قريباً</Button>
+        <Card icon={<Send className="w-6 h-6" />} title="نسخة احتياطية إلى تيليجرام" desc="إرسال ملف النسخة إلى بوت تيليجرام">
+          <Button variant="outline" className="w-full" onClick={async () => {
+            if (!telegramReady()) { toast.error("اضبط توكن البوت ومعرّف المحادثة من الإعدادات"); return; }
+            toast.info("جاري الإرسال إلى تيليجرام...");
+            try { await telegramBackup(); toast.success("تم إرسال النسخة إلى تيليجرام"); }
+            catch (e) { toast.error((e as Error).message); }
+          }}>إرسال النسخة</Button>
         </Card>
-        <Card icon={<Send className="w-6 h-6 rotate-180" />} title="استعادة من تيليجرام" desc="اختيار قناة أو بوت لجلب النسخة">
-          <Button disabled variant="outline" className="w-full">قريباً</Button>
+        <Card icon={<Send className="w-6 h-6 rotate-180" />} title="استعادة من تيليجرام" desc="جلب آخر ملف نسخة من محادثة البوت">
+          <Button variant="outline" className="w-full" onClick={async () => {
+            if (!telegramReady()) { toast.error("اضبط توكن البوت ومعرّف المحادثة من الإعدادات"); return; }
+            if (!confirm("استبدال البيانات الحالية بآخر نسخة من تيليجرام؟")) return;
+            toast.info("جاري الاستعادة...");
+            try { await telegramRestore(); toast.success("تمت الاستعادة بنجاح"); }
+            catch (e) { toast.error((e as Error).message); }
+          }}>استعادة آخر نسخة</Button>
+        </Card>
+        <Card icon={<HardDriveUpload className="w-6 h-6" />} title="نسخة احتياطية إلى جوجل درايف" desc="تنزيل الملف ثم فتح درايف لرفعه">
+          <Button variant="outline" className="w-full" onClick={() => { googleDriveBackup(); toast.success("تم تنزيل النسخة — ارفعها إلى درايف"); }}>حفظ إلى درايف</Button>
         </Card>
       </div>
     </AppShell>
