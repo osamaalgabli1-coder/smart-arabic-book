@@ -110,7 +110,7 @@ const initialState: AppState = {
   cashboxes: [{ id: "main", name: "الصندوق الرئيسي", type: "main", openingBalance: 0, currency: "YER" }],
   vouchers: [],
   transfers: [],
-  company: { name: "شركتي" },
+  company: { name: "اسامه الجبلي واخوانه للتجارة" },
   settings: { whatsappAutoSend: false, smsNotifications: false, passwordEnabled: false },
 };
 
@@ -225,7 +225,7 @@ export function formatNumber(n: number): string {
 
 // اسم الشركة في الإشعارات: نجمة قبل وبعد الاسم بدون كلمة "الشركة"
 export function companyDisplayName(state: AppState): string {
-  return `✦ ${state.company.name} ✦`;
+  return `*${state.company.name}*`;
 }
 
 export function formatCurrency(n: number, currency: Currency = "YER"): string {
