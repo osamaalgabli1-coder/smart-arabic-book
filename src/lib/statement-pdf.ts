@@ -139,7 +139,7 @@ function buildStatementHTML(clientIds: string[], opts: { from?: string; to?: str
   tr.totals td.cre { color:#1e8e3e; }
   tr.totals td.lbl { color:#1a4b8f; background:#fff; }
   tr.final td { background:#f5a3a3; color:#111; font-weight:800; }
-  tr.final td.lbl { color:#1a4b8f; }
+  tr.final td.lbl { color:#1a4b8f; background:#fff; }
   tr.final .final-val { color:#c0392b; font-size: 14px; }
   .empty { text-align:center; padding: 30px; color:#777; }
   .footer { display:flex; justify-content:space-between; font-size:11px; color:#666; margin-top: 8px; border-top:1px solid #ddd; padding-top: 4px; }
