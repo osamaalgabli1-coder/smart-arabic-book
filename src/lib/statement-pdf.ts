@@ -22,10 +22,9 @@ function renderClientBlock(client: Client, opts: { from?: string; to?: string })
       totalDebit += e.debit; totalCredit += e.credit;
       return `<tr>
         <td>${esc(e.date)}</td>
-        <td>${esc(e.number)}</td>
         <td class="ltxt">${esc(e.description)}</td>
-        <td class="deb">${e.debit ? formatNumber(e.debit) : "—"}</td>
-        <td class="cre">${e.credit ? formatNumber(e.credit) : "—"}</td>
+        <td class="deb">${formatNumber(e.debit || 0)}</td>
+        <td class="cre">${formatNumber(e.credit || 0)}</td>
         <td class="bal">${formatBalanceNumber(running)}</td>
       </tr>`;
     }).join("");
@@ -36,24 +35,24 @@ function renderClientBlock(client: Client, opts: { from?: string; to?: string })
       <div class="cur-title">${currencyLabels[cur]} (${currencySymbols[cur]})</div>
       <table>
         <colgroup>
-          <col class="c-date"><col class="c-num"><col class="c-desc"><col class="c-deb"><col class="c-cre"><col class="c-bal">
+          <col class="c-date"><col class="c-desc"><col class="c-deb"><col class="c-cre"><col class="c-bal">
         </colgroup>
         <thead>
-          <tr><th>التاريخ</th><th>رقم السند</th><th>التفاصيل</th><th>عليه</th><th>له</th><th>الرصيد</th></tr>
+          <tr><th>التاريخ</th><th>التفاصيل</th><th>عليه</th><th>له</th><th>الرصيد</th></tr>
         </thead>
         <tbody>
-          <tr class="opening"><td colspan="5">الرصيد الافتتاحي</td><td class="bal">${formatBalanceNumber(opening)}</td></tr>
+          <tr class="opening"><td colspan="4">الرصيد الافتتاحي</td><td class="bal">${formatBalanceNumber(opening)}</td></tr>
           ${bodyRows}
         </tbody>
         <tfoot>
           <tr class="totals">
-            <td colspan="3" class="lbl">إجمالي العمليات</td>
+            <td colspan="2" class="lbl">إجمالي العمليات</td>
             <td class="deb">${formatNumber(totalDebit)}</td>
             <td class="cre">${formatNumber(totalCredit)}</td>
             <td></td>
           </tr>
           <tr class="final">
-            <td colspan="3" class="lbl">الرصيد الإجمالي — ${finalLabel}</td>
+            <td colspan="2" class="lbl">الرصيد الإجمالي — ${finalLabel}</td>
             <td colspan="3" class="final-val">${formatNumber(Math.abs(finalBal))} ${currencySymbols[cur]}</td>
           </tr>
         </tfoot>
