@@ -83,10 +83,10 @@ function buildStatementHTML(clientIds: string[], opts: { from?: string; to?: str
           ${co.logo ? `<img class="logo" src="${co.logo}" alt="شعار">` : ""}
         </div>
         <div class="side left">
-          <div class="co-name">${esc(co.name)}</div>
-          ${co.address ? `<div>${esc(co.address)}</div>` : ""}
-          ${co.phone ? `<div>${esc(co.phone)}</div>` : ""}
-          ${co.email ? `<div>${esc(co.email)}</div>` : ""}
+          <div class="co-name">${esc(co.nameEn || co.name)}</div>
+          ${co.phoneEn || co.phone ? `<div>${esc(co.phoneEn || co.phone || "")}</div>` : ""}
+          ${co.addressEn || co.address ? `<div>${esc(co.addressEn || co.address || "")}</div>` : ""}
+          ${co.emailEn || co.email ? `<div>${esc(co.emailEn || co.email || "")}</div>` : ""}
         </div>
       </div>
       <h2 class="statement-title">كشف حساب — ${esc(c.name)}</h2>
@@ -147,7 +147,7 @@ function buildStatementHTML(clientIds: string[], opts: { from?: string; to?: str
 <body>
   ${clientsHtml || `<div class="empty">لا يوجد عملاء للطباعة</div>`}
   <div class="footer">
-    <span>${esc(co.name)}</span>
+    <span>${esc(co.name)}${co.userName ? ` — اسم المستخدم: ${esc(co.userName)}` : ""}</span>
     <span>${today}</span>
   </div>
   ${opts.autoPrint ? `<script>window.onload = () => setTimeout(() => window.print(), 300);</script>` : ""}

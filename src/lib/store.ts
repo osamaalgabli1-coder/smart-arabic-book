@@ -83,6 +83,13 @@ export type Company = {
   address?: string;
   email?: string;
   notes?: string;
+  // البيانات بالإنجليزية (تظهر في الجهة اليسرى من الكشف)
+  nameEn?: string;
+  phoneEn?: string;
+  addressEn?: string;
+  emailEn?: string;
+  // اسم المستخدم الذي يظهر أسفل الكشف
+  userName?: string;
 };
 
 export type AppSettings = {

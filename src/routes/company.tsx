@@ -86,10 +86,23 @@ function CompanyPage() {
           <p className="text-[11px] text-muted-foreground mt-2">يظهر الشعار في كشف الحساب والسندات والتقارير ورأس الصفحة الرئيسية.</p>
         </div>
 
-        <F label="اسم الشركة"><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></F>
-        <F label="الهاتف"><Input value={form.phone ?? ""} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></F>
-        <F label="العنوان"><Input value={form.address ?? ""} onChange={(e) => setForm({ ...form, address: e.target.value })} /></F>
-        <F label="البريد الإلكتروني"><Input type="email" value={form.email ?? ""} onChange={(e) => setForm({ ...form, email: e.target.value })} /></F>
+        <div className="bg-card border-2 border-border rounded-xl p-4 grid gap-3">
+          <div className="text-xs font-bold text-muted-foreground">البيانات بالعربية — تظهر في الجهة اليمنى من الكشف</div>
+          <F label="اسم الشركة"><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></F>
+          <F label="الهاتف"><Input value={form.phone ?? ""} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></F>
+          <F label="العنوان"><Input value={form.address ?? ""} onChange={(e) => setForm({ ...form, address: e.target.value })} /></F>
+          <F label="البريد الإلكتروني"><Input type="email" value={form.email ?? ""} onChange={(e) => setForm({ ...form, email: e.target.value })} /></F>
+        </div>
+
+        <div className="bg-card border-2 border-border rounded-xl p-4 grid gap-3" dir="ltr">
+          <div className="text-xs font-bold text-muted-foreground" dir="rtl">البيانات بالإنجليزية — تظهر في الجهة اليسرى من الكشف</div>
+          <F label="Company name"><Input value={form.nameEn ?? ""} onChange={(e) => setForm({ ...form, nameEn: e.target.value })} placeholder="Osama Al-Gabli & Bros Trading" /></F>
+          <F label="Phone"><Input value={form.phoneEn ?? ""} onChange={(e) => setForm({ ...form, phoneEn: e.target.value })} /></F>
+          <F label="Address"><Input value={form.addressEn ?? ""} onChange={(e) => setForm({ ...form, addressEn: e.target.value })} /></F>
+          <F label="Email"><Input type="email" value={form.emailEn ?? ""} onChange={(e) => setForm({ ...form, emailEn: e.target.value })} /></F>
+        </div>
+
+        <F label="اسم المستخدم (يظهر أسفل الكشف)"><Input value={form.userName ?? ""} onChange={(e) => setForm({ ...form, userName: e.target.value })} placeholder="اسم المستخدم" /></F>
         <F label="ملاحظات"><Textarea value={form.notes ?? ""} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></F>
         <Button onClick={() => { setState((s) => ({ ...s, company: form })); toast.success("تم حفظ بيانات الشركة"); }}>حفظ</Button>
       </div>
