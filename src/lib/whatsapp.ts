@@ -110,7 +110,7 @@ export function buildBalanceMessage(clientId: string): string {
     if (b > 0) anyCredit = true; else anyDebit = true;
     parts.push(`• ${formatCurrency(Math.abs(b), cur)} ${b > 0 ? "لكم" : "عليكم"}`);
   }
-  const head = anyCredit && !anyDebit ? "إشعار دائن — لكم" : (!anyCredit && anyDebit ? "إشعار مدين — عليكم" : "إشعار رصيد");
+  const head = anyCredit && !anyDebit ? "سند اشعار دائن لكم" : (!anyCredit && anyDebit ? "سند اشعار مدين عليكم" : "سند اشعار رصيد");
   const lines = [
     `📄 *${head}*`,
     `${companyDisplayName(s)}`,

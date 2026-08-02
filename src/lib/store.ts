@@ -110,7 +110,7 @@ const initialState: AppState = {
   cashboxes: [{ id: "main", name: "الصندوق الرئيسي", type: "main", openingBalance: 0, currency: "YER" }],
   vouchers: [],
   transfers: [],
-  company: { name: "شركتي" },
+  company: { name: "اسامه الجبلي واخوانه للتجارة" },
   settings: { whatsappAutoSend: false, smsNotifications: false, passwordEnabled: false },
 };
 
@@ -128,6 +128,8 @@ function load(): AppState {
     parsed.vouchers = (parsed.vouchers ?? []).map((v: Voucher, i: number) => ({ ...v, currency: v.currency ?? "YER", number: v.number ?? String(i + 1).padStart(4, "0") }));
     parsed.transfers = (parsed.transfers ?? []).map((t: Transfer) => ({ ...t, currency: t.currency ?? "YER" }));
     parsed.settings = { ...initialState.settings, ...(parsed.settings ?? {}) };
+    parsed.company = { ...(parsed.company ?? {}) };
+    if (!parsed.company.name || parsed.company.name === "شركتي") parsed.company.name = initialState.company.name;
     return parsed;
   } catch {
     return initialState;
@@ -225,7 +227,7 @@ export function formatNumber(n: number): string {
 
 // اسم الشركة في الإشعارات: نجمة قبل وبعد الاسم بدون كلمة "الشركة"
 export function companyDisplayName(state: AppState): string {
-  return `✦ ${state.company.name} ✦`;
+  return `*${state.company.name}*`;
 }
 
 export function formatCurrency(n: number, currency: Currency = "YER"): string {
