@@ -128,6 +128,8 @@ function load(): AppState {
     parsed.vouchers = (parsed.vouchers ?? []).map((v: Voucher, i: number) => ({ ...v, currency: v.currency ?? "YER", number: v.number ?? String(i + 1).padStart(4, "0") }));
     parsed.transfers = (parsed.transfers ?? []).map((t: Transfer) => ({ ...t, currency: t.currency ?? "YER" }));
     parsed.settings = { ...initialState.settings, ...(parsed.settings ?? {}) };
+    parsed.company = { ...(parsed.company ?? {}) };
+    if (!parsed.company.name || parsed.company.name === "شركتي") parsed.company.name = initialState.company.name;
     return parsed;
   } catch {
     return initialState;
