@@ -73,18 +73,24 @@ function buildStatementHTML(clientIds: string[], opts: { from?: string; to?: str
   const clientsHtml = clients.map((c) => `
     <section class="client">
       <div class="page-header">
-        <div class="left">
-          ${co.logo ? `<img class="logo" src="${co.logo}" alt="شعار">` : ""}
-        </div>
-        <div class="right">
+        <div class="side right">
           <div class="co-name">${esc(co.name)}</div>
           ${co.phone ? `<div>${esc(co.phone)}</div>` : ""}
           ${co.address ? `<div>${esc(co.address)}</div>` : ""}
           ${co.email ? `<div>${esc(co.email)}</div>` : ""}
         </div>
+        <div class="center">
+          ${co.logo ? `<img class="logo" src="${co.logo}" alt="شعار">` : ""}
+        </div>
+        <div class="side left">
+          <div class="co-name">${esc(co.name)}</div>
+          ${co.address ? `<div>${esc(co.address)}</div>` : ""}
+          ${co.phone ? `<div>${esc(co.phone)}</div>` : ""}
+          ${co.email ? `<div>${esc(co.email)}</div>` : ""}
+        </div>
       </div>
       <h2 class="statement-title">كشف حساب — ${esc(c.name)}</h2>
-      <div class="meta">
+      <div class="meta sub">
         ${c.phone ? `الهاتف: ${esc(c.phone)} · ` : ""}
         ${opts.from || opts.to ? `الفترة: ${opts.from || "—"} إلى ${opts.to || "—"}` : `حتى ${today}`}
       </div>
@@ -102,34 +108,37 @@ function buildStatementHTML(clientIds: string[], opts: { from?: string; to?: str
   table, th, td, div, span, h2 { letter-spacing: 0 !important; word-spacing: 0.06em; }
   .client { padding: 6px 0; width: 186mm; }
   .page-break { page-break-after: always; }
-  .page-header { display:flex; justify-content:space-between; align-items:flex-start; border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 10px; }
-  .page-header .right { text-align: left; font-size: 12px; color:#333; }
-  .page-header .left { text-align: right; }
-  .co-name { font-weight: 800; font-size: 14px; }
-  .logo { width: 70px; height: 70px; object-fit: contain; }
-  .statement-title { text-align:center; color:#1a4b8f; text-decoration: underline; margin: 8px 0; font-size: 18px; }
-  .meta { text-align:center; font-size: 12px; color:#444; margin-bottom: 8px; }
+  .page-header { display:flex; justify-content:space-between; align-items:flex-start; padding-bottom: 6px; margin-bottom: 6px; }
+  .page-header .side { font-size: 12px; color:#111; line-height: 1.6; width: 38%; }
+  .page-header .side.right { text-align: right; }
+  .page-header .side.left { text-align: left; direction: ltr; }
+  .page-header .center { width: 24%; text-align:center; }
+  .co-name { font-weight: 800; font-size: 13px; }
+  .logo { width: 66px; height: 66px; object-fit: contain; }
+  .statement-title { text-align:center; color:#1a4b8f; text-decoration: underline; margin: 6px 0 2px; font-size: 17px; font-weight: 800; }
+  .meta { text-align:center; font-size: 12px; color:#1a4b8f; margin-bottom: 10px; text-decoration: underline; }
   .cur-block { margin-top: 10px; }
   .cur-title { background:#eef3fb; color:#1a4b8f; font-weight:800; padding:6px 10px; border:1px solid #cfd8ea; border-bottom:none; border-radius:6px 6px 0 0; font-size: 13px; }
   table { width:100%; table-layout: fixed; border-collapse: collapse; font-size: 11.5px; }
-  col.c-date { width: 17%; }
-  col.c-num { width: 9%; }
+  col.c-date { width: 16%; }
   col.c-desc { width: 30%; }
-  col.c-deb { width: 13%; }
-  col.c-cre { width: 13%; }
+  col.c-deb { width: 18%; }
+  col.c-cre { width: 18%; }
   col.c-bal { width: 18%; }
-  th, td { border: 1px solid #999; padding: 5px 4px; text-align: center; overflow-wrap: anywhere; word-break: break-word; vertical-align: middle; }
+  th, td { border: 1px solid #666; padding: 7px 5px; text-align: center; overflow-wrap: anywhere; word-break: break-word; vertical-align: middle; }
   td:first-child { white-space: nowrap; font-size: 11px; }
   td.ltxt { font-size: 10.5px; line-height: 1.45; }
-  th { background: #e9e9e9; color:#111; font-weight:700; }
+  th { background: #c9c9c9; color:#1a4b8f; font-weight:800; font-size: 13px; }
   td.ltxt { text-align: right; }
-  td.deb { color:#c0392b; font-weight:700; }
-  td.cre { color:#1e8e3e; font-weight:700; }
+  td.deb { color:#111; font-weight:700; }
+  td.cre { color:#111; font-weight:700; }
   td.bal { color:#c0392b; font-weight:800; }
   tr.opening td { background:#fafafa; font-weight:600; }
-  tr.totals td { background:#f2f2f2; font-weight:800; }
-  tr.totals td.lbl { color:#1a4b8f; }
-  tr.final td { background:#fce4e4; color:#111; font-weight:800; }
+  tr.totals td { background:#e2e2e2; font-weight:800; }
+  tr.totals td.deb { color:#c0392b; }
+  tr.totals td.cre { color:#1e8e3e; }
+  tr.totals td.lbl { color:#1a4b8f; background:#fff; }
+  tr.final td { background:#f5a3a3; color:#111; font-weight:800; }
   tr.final td.lbl { color:#1a4b8f; }
   tr.final .final-val { color:#c0392b; font-size: 14px; }
   .empty { text-align:center; padding: 30px; color:#777; }
