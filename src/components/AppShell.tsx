@@ -1,5 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, Home, Users, Wallet, FileText, Send, BarChart3, Settings, Download, Upload, Building2, X, MessageCircle, Phone, HardDriveUpload, Lock } from "lucide-react";
+import { Menu, Home, Users, Wallet, FileText, Send, BarChart3, Settings, Download, Upload, Building2, X, MessageCircle, Phone, HardDriveUpload, Lock, ArrowRight } from "lucide-react";
+import { useRouter } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import { useAppState } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -24,6 +25,8 @@ const menu = [
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const router = useRouter();
+  const isHome = path === "/";
   const company = useAppState((s) => s.company);
   const lockEnabled = useAppState((s) => Boolean(s.settings.passwordEnabled && s.settings.password));
 
@@ -32,13 +35,24 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-background text-foreground pb-24">
       <header className="sticky top-0 z-30 bg-header text-header-foreground shadow-md">
         <div className="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
-          <button
-            onClick={() => setOpen(true)}
-            aria-label="القائمة"
-            className="p-2 rounded-md hover:bg-black/10"
-          >
-            <Menu className="w-6 h-6" />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setOpen(true)}
+              aria-label="القائمة"
+              className="p-2 rounded-md hover:bg-black/10"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+            {!isHome && (
+              <button
+                onClick={() => router.history.back()}
+                aria-label="رجوع"
+                className="p-2 rounded-md hover:bg-black/10"
+              >
+                <ArrowRight className="w-6 h-6" />
+              </button>
+            )}
+          </div>
           <div className="text-center flex-1">
             <h1 className="text-lg font-extrabold tracking-tight">نظام المحاسب المطور</h1>
             <p className="text-[11px] opacity-80">إعداد وتطوير: أسامة الجبلي • الإصدار 1.0</p>
