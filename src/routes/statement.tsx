@@ -70,26 +70,6 @@ function StatementPage() {
           disabled={!client}
           onClick={async () => {
             if (!client) return;
-            toast.info("جاري تجهيز الكشف بجودة عالية…");
-            try {
-              const r = await sendClientStatementToWhatsapp(client.id, { from, to });
-              if (r === "downloaded") {
-                const phone = (client.phone || "").replace(/\D/g, "");
-                if (phone) window.open(`https://wa.me/${phone.startsWith("967") ? phone : "967" + phone}`, "_blank");
-                toast.success("تم تنزيل الملف — أرفقه في محادثة واتساب");
-              }
-            } catch {
-              toast.error("تعذر إنشاء الملف");
-            }
-          }}
-        >
-          <MessageCircle className="w-4 h-4 ml-1" /> إرسال PDF لواتساب العميل
-        </Button>
-        <Button
-          variant="outline"
-          disabled={!client}
-          onClick={async () => {
-            if (!client) return;
             toast.info("جاري فتح الملف…");
             await openStatementPDFFile([client.id], { from, to, title: `كشف حساب — ${client.name}` });
           }}
