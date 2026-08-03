@@ -147,7 +147,6 @@ function buildStatementHTML(clientIds: string[], opts: { from?: string; to?: str
   .brand-title { text-align:center; font-weight:900; font-size: 15px; color:#9aa4b2; opacity:.45; letter-spacing:0 !important; margin-bottom: 4px; }
 </style></head>
 <body>
-  <div class="brand-title">نظام المحاسب المطور — إعداد اسامه الجبلي</div>
   ${clientsHtml || `<div class="empty">لا يوجد عملاء للطباعة</div>`}
   <div class="footer">
     <span>${co.userName ? `اسم المستخدم: ${esc(co.userName)}` : ""}</span>
