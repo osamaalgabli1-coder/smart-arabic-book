@@ -19,6 +19,7 @@ function ReportsPage() {
   return (
     <AppShell>
       <PageHeader title="التقارير" subtitle="مفصل حسب العملة: ريال يمني، ريال سعودي، دولار أمريكي" />
+      <div className="text-center font-extrabold text-muted-foreground/40 text-sm mb-3 select-none">نظام المحاسب المطور — اعداد اسامه الجبلي</div>
       <div className="grid grid-cols-2 gap-3 mb-5">
         <Kpi k="عدد العملاء" v={String(state.clients.length)} />
         <Kpi k="عدد الصناديق" v={String(state.cashboxes.length)} />
