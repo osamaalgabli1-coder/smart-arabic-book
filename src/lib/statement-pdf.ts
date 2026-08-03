@@ -72,6 +72,7 @@ function buildStatementHTML(clientIds: string[], opts: { from?: string; to?: str
 
   const clientsHtml = clients.map((c) => `
     <section class="client">
+      <div class="brand-title">نظام المحاسب المطور — إعداد اسامه الجبلي</div>
       <div class="page-header">
         <div class="side right">
           <div class="co-name">${esc(co.name)}</div>
