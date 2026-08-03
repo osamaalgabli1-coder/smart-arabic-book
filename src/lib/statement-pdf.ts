@@ -147,7 +147,7 @@ function buildStatementHTML(clientIds: string[], opts: { from?: string; to?: str
 <body>
   ${clientsHtml || `<div class="empty">لا يوجد عملاء للطباعة</div>`}
   <div class="footer">
-    <span>${co.userName ? `اسم المستخدم: ${esc(co.userName)}` : ""}</span>
+    <span>${esc(co.name)}${co.userName ? ` — اسم المستخدم: ${esc(co.userName)}` : ""}</span>
     <span>${today}</span>
   </div>
   ${opts.autoPrint ? `<script>window.onload = () => setTimeout(() => window.print(), 300);</script>` : ""}
