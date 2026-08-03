@@ -237,6 +237,18 @@ export async function downloadStatementPDF(clientIds: string[], opts: { from?: s
   pdf.save(name);
 }
 
+// فتح ملف PDF عالي الجودة في تطبيق/عارض PDF
+export async function openStatementPDFFile(clientIds: string[], opts: { from?: string; to?: string; title?: string } = {}) {
+  const pdf = await buildStatementPDFDoc(clientIds, opts);
+  const blob = pdf.output("blob");
+  const url = URL.createObjectURL(blob);
+  const win = window.open(url, "_blank");
+  if (!win) {
+    triggerDownload((opts.title ?? "كشف-حساب") + "-" + fileDate() + ".pdf", blob);
+  }
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+}
+
 // إنشاء ملف PDF ومشاركته مباشرة إلى واتساب رقم العميل (مع تنزيل احتياطي)
 export async function sendClientStatementToWhatsapp(clientId: string, opts: { from?: string; to?: string } = {}) {
   const s = getState();
