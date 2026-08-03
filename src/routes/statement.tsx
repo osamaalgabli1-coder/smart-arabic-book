@@ -6,10 +6,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { FileDown, Users, MessageCircle, FileText } from "lucide-react";
+import { FileDown, Users, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { useAppState, clientLedger, formatNumber, formatBalanceNumber, currencyLabels, currencySymbols, CURRENCIES, type Currency } from "@/lib/store";
-import { openStatementPDF, openStatementPDFFile, sendClientStatementToWhatsapp } from "@/lib/statement-pdf";
+import { openStatementPDF, openStatementPDFFile } from "@/lib/statement-pdf";
 
 export const Route = createFileRoute("/statement")({ component: StatementPage });
 
