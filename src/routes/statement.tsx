@@ -6,9 +6,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { FileDown, Users } from "lucide-react";
+import { FileDown, Users, MessageCircle, FileText } from "lucide-react";
+import { toast } from "sonner";
 import { useAppState, clientLedger, formatNumber, formatBalanceNumber, currencyLabels, currencySymbols, CURRENCIES, type Currency } from "@/lib/store";
-import { openStatementPDF } from "@/lib/statement-pdf";
+import { openStatementPDF, openStatementPDFFile, sendClientStatementToWhatsapp } from "@/lib/statement-pdf";
 
 export const Route = createFileRoute("/statement")({ component: StatementPage });
 
@@ -63,6 +64,37 @@ function StatementPage() {
         </Button>
         <Button variant="outline" onClick={() => openStatementPDF(state.clients.map((c) => c.id), { from, to, title: "كشف حسابات كل العملاء" })}>
           <Users className="w-4 h-4 ml-1" /> تصدير PDF لكل العملاء
+        </Button>
+        <Button
+          variant="outline"
+          disabled={!client}
+          onClick={async () => {
+            if (!client) return;
+            toast.info("جاري تجهيز الكشف بجودة عالية…");
+            try {
+              const r = await sendClientStatementToWhatsapp(client.id, { from, to });
+              if (r === "downloaded") {
+                const phone = (client.phone || "").replace(/\D/g, "");
+                if (phone) window.open(`https://wa.me/${phone.startsWith("967") ? phone : "967" + phone}`, "_blank");
+                toast.success("تم تنزيل الملف — أرفقه في محادثة واتساب");
+              }
+            } catch {
+              toast.error("تعذر إنشاء الملف");
+            }
+          }}
+        >
+          <MessageCircle className="w-4 h-4 ml-1" /> إرسال PDF لواتساب العميل
+        </Button>
+        <Button
+          variant="outline"
+          disabled={!client}
+          onClick={async () => {
+            if (!client) return;
+            toast.info("جاري فتح الملف…");
+            await openStatementPDFFile([client.id], { from, to, title: `كشف حساب — ${client.name}` });
+          }}
+        >
+          <FileText className="w-4 h-4 ml-1" /> فتح الكشف في تطبيق PDF
         </Button>
       </div>
 
