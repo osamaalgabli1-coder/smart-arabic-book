@@ -143,11 +143,13 @@ function buildStatementHTML(clientIds: string[], opts: { from?: string; to?: str
   tr.final .final-val { color:#c0392b; font-size: 14px; }
   .empty { text-align:center; padding: 30px; color:#777; }
   .footer { display:flex; justify-content:space-between; font-size:11px; color:#666; margin-top: 8px; border-top:1px solid #ddd; padding-top: 4px; }
+  .brand-title { text-align:center; font-weight:900; font-size: 15px; color:#9aa4b2; opacity:.45; letter-spacing:0 !important; margin-bottom: 4px; }
 </style></head>
 <body>
+  <div class="brand-title">نظام المحاسب المطور — إعداد اسامه الجبلي</div>
   ${clientsHtml || `<div class="empty">لا يوجد عملاء للطباعة</div>`}
   <div class="footer">
-    <span>${esc(co.name)}${co.userName ? ` — اسم المستخدم: ${esc(co.userName)}` : ""}</span>
+    <span>${co.userName ? `اسم المستخدم: ${esc(co.userName)}` : ""}</span>
     <span>${today}</span>
   </div>
   ${opts.autoPrint ? `<script>window.onload = () => setTimeout(() => window.print(), 300);</script>` : ""}
