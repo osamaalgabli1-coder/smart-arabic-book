@@ -146,7 +146,7 @@ function buildStatementHTML(clientIds: string[], opts: { from?: string; to?: str
   tr.final .final-val { color:#c0392b; font-size: 14px; }
   .empty { text-align:center; padding: 30px; color:#777; }
   .footer { display:flex; justify-content:space-between; font-size:11px; color:#666; margin-top: 8px; border-top:1px solid #ddd; padding-top: 4px; }
-  .brand-title { text-align:center; font-weight:900; font-size: 15px; color:#9aa4b2; opacity:.45; letter-spacing:0 !important; margin-bottom: 4px; }
+  .brand-title { text-align:center; font-weight:900; font-size: 15px; color:#9aa4b2; opacity:.45; margin-bottom: 4px; }
 </style></head>
 <body>
   ${clientsHtml || `<div class="empty">لا يوجد عملاء للطباعة</div>`}
@@ -198,7 +198,8 @@ async function buildStatementPDFDoc(clientIds: string[], opts: { from?: string; 
   document.body.appendChild(iframe);
   const doc = iframe.contentDocument!;
   doc.open(); doc.write(html); doc.close();
-  await new Promise((r) => setTimeout(r, 600));
+  try { await (doc as Document & { fonts?: FontFaceSet }).fonts?.ready; } catch { /* ignore */ }
+  await new Promise((r) => setTimeout(r, 900));
   const body = doc.body;
   const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
   const pdfW = pdf.internal.pageSize.getWidth();
