@@ -6,10 +6,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { FileDown, Users, FileText } from "lucide-react";
+import { FileDown, Users, FileText, Download, Share2, MessageCircle, TrendingUp, TrendingDown, User } from "lucide-react";
 import { toast } from "sonner";
-import { useAppState, clientLedger, formatNumber, formatBalanceNumber, currencyLabels, currencySymbols, CURRENCIES, type Currency } from "@/lib/store";
-import { openStatementPDF, openStatementPDFFile } from "@/lib/statement-pdf";
+import { useAppState, getState, clientBalance, formatCurrency, clientLedger, formatNumber, formatBalanceNumber, currencyLabels, currencySymbols, CURRENCIES, type Currency } from "@/lib/store";
+import { openStatementPDF, openStatementPDFFile, downloadStatementHTML, downloadStatementPDF, sendClientStatementToWhatsapp } from "@/lib/statement-pdf";
+import { sendWhatsapp, buildBalanceMessage } from "@/lib/whatsapp";
 
 export const Route = createFileRoute("/statement")({ component: StatementPage });
 
@@ -45,7 +46,7 @@ function StatementPage() {
 
   return (
     <AppShell>
-      <PageHeader title="كشف الحساب التفصيلي" subtitle="جميع عمليات العميل: قبض، صرف، له، عليه، حوالات، قيد بسيط" />
+      <PageHeader title="إدارة الحسابات" subtitle="كشف تفصيلي · تصدير PDF · مشاركة واتساب" />
       <div className="grid sm:grid-cols-3 gap-3 mb-4">
         <div className="grid gap-1.5">
           <Label>العميل</Label>
