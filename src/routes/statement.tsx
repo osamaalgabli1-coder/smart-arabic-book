@@ -6,10 +6,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { FileDown, Users, FileText } from "lucide-react";
+import { FileDown, Users, FileText, Download, Share2, MessageCircle, TrendingUp, TrendingDown, User } from "lucide-react";
 import { toast } from "sonner";
-import { useAppState, clientLedger, formatNumber, formatBalanceNumber, currencyLabels, currencySymbols, CURRENCIES, type Currency } from "@/lib/store";
-import { openStatementPDF, openStatementPDFFile } from "@/lib/statement-pdf";
+import { useAppState, getState, clientBalance, formatCurrency, clientLedger, formatNumber, formatBalanceNumber, currencyLabels, currencySymbols, CURRENCIES, type Currency } from "@/lib/store";
+import { openStatementPDF, openStatementPDFFile, downloadStatementHTML, downloadStatementPDF, sendClientStatementToWhatsapp } from "@/lib/statement-pdf";
+import { sendWhatsapp, buildBalanceMessage } from "@/lib/whatsapp";
 
 export const Route = createFileRoute("/statement")({ component: StatementPage });
 
@@ -45,7 +46,7 @@ function StatementPage() {
 
   return (
     <AppShell>
-      <PageHeader title="كشف الحساب التفصيلي" subtitle="جميع عمليات العميل: قبض، صرف، له، عليه، حوالات، قيد بسيط" />
+      <PageHeader title="إدارة الحسابات" subtitle="كشف تفصيلي · تصدير PDF · مشاركة واتساب" />
       <div className="grid sm:grid-cols-3 gap-3 mb-4">
         <div className="grid gap-1.5">
           <Label>العميل</Label>
@@ -79,6 +80,68 @@ function StatementPage() {
       </div>
 
       {!client && <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-xl">اختر عميلاً لعرض الكشف</div>}
+
+      <section className="mb-5 border-2 border-border rounded-xl p-3">
+        <h3 className="font-bold text-primary mb-2 text-sm">تصدير البيانات</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <MiniBtn icon={<User className="w-4 h-4" />} label="كشف تفصيلي — هذا العميل" onClick={() => {
+            if (!client) { toast.error("اختر عميلاً"); return; }
+            openStatementPDF([client.id], { from, to, title: `كشف حساب — ${client.name}` });
+          }} />
+          <MiniBtn icon={<Users className="w-4 h-4" />} label="كشف تفصيلي — كل العملاء" onClick={() => {
+            if (!state.clients.length) { toast.error("لا يوجد عملاء"); return; }
+            openStatementPDF(state.clients.map((c) => c.id), { from, to, title: "كشف حسابات كل العملاء" });
+          }} />
+          <MiniBtn icon={<Download className="w-4 h-4" />} label="تنزيل كشف هذا العميل" onClick={() => {
+            if (!client) { toast.error("اختر عميلاً"); return; }
+            downloadStatementHTML([client.id], { from, to, title: `كشف-حساب-${client.name}` });
+            toast.success("تم التنزيل");
+          }} />
+          <MiniBtn icon={<FileDown className="w-4 h-4" />} label="كشف حساب عميل PDF" onClick={async () => {
+            if (!client) { toast.error("اختر عميلاً"); return; }
+            toast.info("جاري إنشاء PDF...");
+            try { await downloadStatementPDF([client.id], { from, to, title: `كشف-حساب-${client.name}` }); toast.success("تم التنزيل"); }
+            catch (e) { toast.error("تعذّر إنشاء PDF"); console.error(e); }
+          }} />
+          <MiniBtn icon={<FileDown className="w-4 h-4" />} label="PDF — كل العملاء تفصيلي" onClick={async () => {
+            if (!state.clients.length) { toast.error("لا يوجد عملاء"); return; }
+            toast.info("جاري إنشاء PDF...");
+            try { await downloadStatementPDF(state.clients.map((c) => c.id), { from, to, title: "كشف-تفصيلي-كل-العملاء" }); toast.success("تم التنزيل"); }
+            catch (e) { toast.error("تعذّر إنشاء PDF"); console.error(e); }
+          }} />
+          <MiniBtn icon={<TrendingUp className="w-4 h-4" />} label="PDF — العملاء دائن (له)" onClick={async () => {
+            const s = getState();
+            const ids = s.clients.filter((c) => clientBalance(s, c.id) > 0).map((c) => c.id);
+            if (!ids.length) { toast.error("لا يوجد عملاء دائنون"); return; }
+            toast.info("جاري إنشاء PDF...");
+            try { await downloadStatementPDF(ids, { from, to, title: "كشف-العملاء-الدائنين-له" }); toast.success("تم التنزيل"); }
+            catch (e) { toast.error("تعذّر إنشاء PDF"); console.error(e); }
+          }} />
+          <MiniBtn icon={<TrendingDown className="w-4 h-4" />} label="PDF — العملاء مدين (عليه)" onClick={async () => {
+            const s = getState();
+            const ids = s.clients.filter((c) => clientBalance(s, c.id) < 0).map((c) => c.id);
+            if (!ids.length) { toast.error("لا يوجد عملاء مدينون"); return; }
+            toast.info("جاري إنشاء PDF...");
+            try { await downloadStatementPDF(ids, { from, to, title: "كشف-العملاء-المدينين-عليه" }); toast.success("تم التنزيل"); }
+            catch (e) { toast.error("تعذّر إنشاء PDF"); console.error(e); }
+          }} />
+          <MiniBtn icon={<Share2 className="w-4 h-4" />} label="مشاركة عبر واتساب" onClick={() => {
+            const s = getState();
+            const text = `كشف عملاء ${s.company.name}\n\n` + s.clients.map((c) => `• ${c.name}: ${formatCurrency(clientBalance(s, c.id))}`).join("\n");
+            window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+          }} />
+          <MiniBtn icon={<MessageCircle className="w-4 h-4" />} label="إرسال كشف العميل PDF لواتساب" onClick={async () => {
+            if (!client) { toast.error("اختر عميلاً"); return; }
+            toast.info("جاري تجهيز الكشف...");
+            try {
+              const r = await sendClientStatementToWhatsapp(client.id, { from, to });
+              if (r === "shared") { toast.success("تمت المشاركة"); return; }
+              toast.success("تم تنزيل الكشف — أرفقه في المحادثة");
+              sendWhatsapp(client.phone, buildBalanceMessage(client.id));
+            } catch (e) { toast.error("تعذّر إنشاء PDF"); console.error(e); }
+          }} />
+        </div>
+      </section>
 
       {client && perCurrency && (
         <div className="bg-card border-2 border-border rounded-xl overflow-hidden" style={{ fontFamily: '"Amiri","Tajawal","Cairo",Arial,sans-serif', letterSpacing: "0.03em", wordSpacing: "0.12em" }}>
@@ -153,5 +216,14 @@ function StatementPage() {
         </div>
       )}
     </AppShell>
+  );
+}
+
+function MiniBtn({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick: () => void }) {
+  return (
+    <Button variant="outline" size="sm" onClick={onClick} className="h-auto py-2 px-2 justify-start gap-2 text-[11px] leading-tight">
+      <span className="text-primary shrink-0">{icon}</span>
+      <span className="font-bold text-right flex-1">{label}</span>
+    </Button>
   );
 }

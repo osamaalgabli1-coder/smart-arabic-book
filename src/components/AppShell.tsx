@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, Home, Users, Wallet, FileText, Send, BarChart3, Settings, Download, Upload, Building2, X, MessageCircle, Phone, HardDriveUpload, Lock, ArrowRight } from "lucide-react";
+import { Menu, Home, Users, Wallet, FileText, Send, BarChart3, Settings, Upload, Building2, X, MessageCircle, Phone, HardDriveUpload, Lock, ArrowRight } from "lucide-react";
 import { useRouter } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import { useAppState } from "@/lib/store";
@@ -14,10 +14,9 @@ const menu = [
   { to: "/cashboxes", label: "الصناديق", icon: Wallet },
   { to: "/vouchers", label: "السندات والقيود", icon: FileText },
   { to: "/transfers", label: "الحوالات", icon: Send },
-  { to: "/statement", label: "كشف الحساب", icon: FileText },
+  { to: "/statement", label: "إدارة الحسابات", icon: FileText },
   { to: "/reports", label: "التقارير", icon: BarChart3 },
   { to: "/backup", label: "النسخ الاحتياطي والاستعادة", icon: Upload },
-  { to: "/export", label: "تصدير البيانات", icon: Download },
   { to: "/company", label: "إعدادات الشركة", icon: Building2 },
   { to: "/settings", label: "الإعدادات", icon: Settings },
 ] as const;

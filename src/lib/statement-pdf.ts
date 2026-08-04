@@ -101,12 +101,14 @@ function buildStatementHTML(clientIds: string[], opts: { from?: string; to?: str
 
   const html = `<!doctype html>
 <html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>${esc(title)}</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
   @page { size: A4; margin: 12mm; }
   * { box-sizing: border-box; }
-  html, body { letter-spacing: normal; }
-  body { font-family: "Tajawal","Cairo","Amiri","Segoe UI",Arial,sans-serif; color:#111; margin:0; width: 186mm; letter-spacing: 0 !important; word-spacing: 0.06em; -webkit-font-smoothing: antialiased; }
-  table, th, td, div, span, h2 { letter-spacing: 0 !important; word-spacing: 0.06em; }
+  html, body, table, th, td, div, span, h2 { letter-spacing: normal !important; }
+  body { font-family: "Cairo","Tajawal","Segoe UI",Arial,sans-serif; color:#111; margin:0; width: 186mm; word-spacing: 0.22em; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  table, th, td, div, span, h2 { word-spacing: 0.22em; }
   .client { padding: 6px 0; width: 186mm; }
   .page-break { page-break-after: always; }
   .page-header { display:flex; justify-content:space-between; align-items:flex-start; padding-bottom: 6px; margin-bottom: 6px; }
@@ -144,7 +146,7 @@ function buildStatementHTML(clientIds: string[], opts: { from?: string; to?: str
   tr.final .final-val { color:#c0392b; font-size: 14px; }
   .empty { text-align:center; padding: 30px; color:#777; }
   .footer { display:flex; justify-content:space-between; font-size:11px; color:#666; margin-top: 8px; border-top:1px solid #ddd; padding-top: 4px; }
-  .brand-title { text-align:center; font-weight:900; font-size: 15px; color:#9aa4b2; opacity:.45; letter-spacing:0 !important; margin-bottom: 4px; }
+  .brand-title { text-align:center; font-weight:900; font-size: 15px; color:#9aa4b2; opacity:.45; margin-bottom: 4px; }
 </style></head>
 <body>
   ${clientsHtml || `<div class="empty">لا يوجد عملاء للطباعة</div>`}
@@ -196,7 +198,8 @@ async function buildStatementPDFDoc(clientIds: string[], opts: { from?: string; 
   document.body.appendChild(iframe);
   const doc = iframe.contentDocument!;
   doc.open(); doc.write(html); doc.close();
-  await new Promise((r) => setTimeout(r, 600));
+  try { await (doc as Document & { fonts?: FontFaceSet }).fonts?.ready; } catch { /* ignore */ }
+  await new Promise((r) => setTimeout(r, 900));
   const body = doc.body;
   const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
   const pdfW = pdf.internal.pageSize.getWidth();
