@@ -6,10 +6,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { FileDown, Users, FileText, Download, Share2, MessageCircle, TrendingUp, TrendingDown, User } from "lucide-react";
+import { FileDown, Users, FileText, Download, Share2, MessageCircle, TrendingUp, TrendingDown, User, LayoutList } from "lucide-react";
 import { toast } from "sonner";
 import { useAppState, getState, clientBalance, formatCurrency, clientLedger, formatNumber, formatBalanceNumber, currencyLabels, currencySymbols, CURRENCIES, type Currency } from "@/lib/store";
-import { openStatementPDF, openStatementPDFFile, downloadStatementHTML, downloadStatementPDF, sendClientStatementToWhatsapp } from "@/lib/statement-pdf";
+import { openStatementPDF, openStatementPDFFile, downloadStatementHTML, downloadStatementPDF, sendClientStatementToWhatsapp, downloadAggregateStatementPDF } from "@/lib/statement-pdf";
 import { sendWhatsapp, buildBalanceMessage } from "@/lib/whatsapp";
 
 export const Route = createFileRoute("/statement")({ component: StatementPage });
@@ -107,6 +107,12 @@ function StatementPage() {
             if (!state.clients.length) { toast.error("لا يوجد عملاء"); return; }
             toast.info("جاري إنشاء PDF...");
             try { await downloadStatementPDF(state.clients.map((c) => c.id), { from, to, title: "كشف-تفصيلي-كل-العملاء" }); toast.success("تم التنزيل"); }
+            catch (e) { toast.error("تعذّر إنشاء PDF"); console.error(e); }
+          }} />
+          <MiniBtn icon={<LayoutList className="w-4 h-4" />} label="PDF — كل العملاء إجمالي" onClick={async () => {
+            if (!state.clients.length) { toast.error("لا يوجد عملاء"); return; }
+            toast.info("جاري إنشاء PDF...");
+            try { await downloadAggregateStatementPDF({ title: "كشف-إجمالي-كل-العملاء" }); toast.success("تم التنزيل"); }
             catch (e) { toast.error("تعذّر إنشاء PDF"); console.error(e); }
           }} />
           <MiniBtn icon={<TrendingUp className="w-4 h-4" />} label="PDF — العملاء دائن (له)" onClick={async () => {

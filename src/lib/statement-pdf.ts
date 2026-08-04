@@ -273,6 +273,152 @@ export async function sendClientStatementToWhatsapp(clientId: string, opts: { fr
   return "downloaded" as const;
 }
 
+// كشف إجمالي لكل العملاء (جدول ملخص)
+export async function downloadAggregateStatementPDF(opts: { title?: string } = {}) {
+  const s = getState();
+  const co = s.company;
+  const today = new Date().toISOString().slice(0, 10);
+  const title = opts.title ?? "كشف-إجمالي-كل-العملاء";
+  const rows = s.clients.map((c, i) => {
+    const bal = clientBalance(s, c.id);
+    const label = bal >= 0 ? "لكم" : "عليكم";
+    return `<tr>
+      <td>${i + 1}</td>
+      <td class="name">${esc(c.name)}</td>
+      <td>${esc(c.phone ?? "—")}</td>
+      <td class="bal">${formatBalanceNumber(bal)}</td>
+      <td class="lbl">${label}</td>
+    </tr>`;
+  }).join("");
+
+  const html = `<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>${esc(title)}</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 12mm; }
+  * { box-sizing: border-box; }
+  html, body, table, th, td, div, span, h2 { letter-spacing: normal !important; }
+  body { font-family: "Cairo","Tajawal","Segoe UI",Arial,sans-serif; color:#111; margin:0; width: 186mm; word-spacing: 0.22em; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  table, th, td, div, span, h2 { word-spacing: 0.22em; }
+  .client { padding: 6px 0; width: 186mm; }
+  .page-header { display:flex; justify-content:space-between; align-items:flex-start; padding-bottom: 6px; margin-bottom: 6px; }
+  .page-header .side { font-size: 12px; color:#111; line-height: 1.6; width: 38%; }
+  .page-header .side.right { text-align: right; }
+  .page-header .side.left { text-align: left; direction: ltr; }
+  .page-header .center { width: 24%; text-align:center; }
+  .co-name { font-weight: 800; font-size: 13px; }
+  .logo { width: 66px; height: 66px; object-fit: contain; }
+  .statement-title { text-align:center; color:#1a4b8f; text-decoration: underline; margin: 6px 0 2px; font-size: 17px; font-weight: 800; }
+  .meta { text-align:center; font-size: 12px; color:#1a4b8f; margin-bottom: 10px; text-decoration: underline; }
+  table { width:100%; table-layout: fixed; border-collapse: collapse; font-size: 11.5px; margin-top: 10px; }
+  col.c-num { width: 8%; }
+  col.c-name { width: 32%; }
+  col.c-phone { width: 22%; }
+  col.c-bal { width: 22%; }
+  col.c-lbl { width: 16%; }
+  th, td { border: 1px solid #666; padding: 7px 5px; text-align: center; overflow-wrap: anywhere; word-break: break-word; vertical-align: middle; }
+  td.name { text-align: right; font-weight: 700; }
+  td.bal { color:#c0392b; font-weight:800; }
+  td.lbl { font-weight:700; }
+  th { background: #c9c9c9; color:#1a4b8f; font-weight:800; font-size: 13px; }
+  tr.totals td { background:#e2e2e2; font-weight:800; }
+  tr.totals td.bal { color:#c0392b; }
+  .empty { text-align:center; padding: 30px; color:#777; }
+  .footer { display:flex; justify-content:space-between; font-size:11px; color:#666; margin-top: 8px; border-top:1px solid #ddd; padding-top: 4px; }
+  .brand-title { text-align:center; font-weight:900; font-size: 15px; color:#9aa4b2; opacity:.45; margin-bottom: 4px; }
+</style></head><body>
+  <section class="client">
+    <div class="brand-title">نظام المحاسب المطور — إعداد اسامه الجبلي</div>
+    <div class="page-header">
+      <div class="side right">
+        <div class="co-name">${esc(co.name)}</div>
+        ${co.phone ? `<div>${esc(co.phone)}</div>` : ""}
+        ${co.address ? `<div>${esc(co.address)}</div>` : ""}
+        ${co.email ? `<div>${esc(co.email)}</div>` : ""}
+      </div>
+      <div class="center">
+        ${co.logo ? `<img class="logo" src="${co.logo}" alt="شعار">` : ""}
+      </div>
+      <div class="side left">
+        <div class="co-name">${esc(co.nameEn || co.name)}</div>
+        ${co.phoneEn || co.phone ? `<div>${esc(co.phoneEn || co.phone || "")}</div>` : ""}
+        ${co.addressEn || co.address ? `<div>${esc(co.addressEn || co.address || "")}</div>` : ""}
+        ${co.emailEn || co.email ? `<div>${esc(co.emailEn || co.email || "")}</div>` : ""}
+      </div>
+    </div>
+    <h2 class="statement-title">كشف إجمالي — كل العملاء</h2>
+    <div class="meta">${today}</div>
+    ${s.clients.length === 0 ? `<div class="empty">لا يوجد عملاء للطباعة</div>` : `
+    <table>
+      <colgroup><col class="c-num"><col class="c-name"><col class="c-phone"><col class="c-bal"><col class="c-lbl"></colgroup>
+      <thead>
+        <tr><th>#</th><th>الاسم</th><th>الهاتف</th><th>الرصيد الإجمالي</th><th>الحالة</th></tr>
+      </thead>
+      <tbody>
+        ${rows}
+      </tbody>
+      <tfoot>
+        <tr class="totals">
+          <td colspan="3">إجمالي الأرصدة</td>
+          <td class="bal">${formatBalanceNumber(s.clients.reduce((sum, c) => sum + clientBalance(s, c.id), 0))}</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>`}
+  </section>
+  <div class="footer">
+    <span>${co.userName ? `اسم المستخدم: ${esc(co.userName)}` : ""}</span>
+    <span>${today}</span>
+  </div>
+</body></html>`;
+
+  const iframe = document.createElement("iframe");
+  iframe.style.position = "fixed";
+  iframe.style.left = "-10000px";
+  iframe.style.top = "0";
+  iframe.style.width = "760px";
+  iframe.style.height = "1400px";
+  document.body.appendChild(iframe);
+  const doc = iframe.contentDocument!;
+  doc.open(); doc.write(html); doc.close();
+  try { await (doc as Document & { fonts?: FontFaceSet }).fonts?.ready; } catch { /* ignore */ }
+  await new Promise((r) => setTimeout(r, 900));
+  const body = doc.body;
+  const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
+  const pdfW = pdf.internal.pageSize.getWidth();
+  const pdfH = pdf.internal.pageSize.getHeight();
+  const sections = Array.from(body.querySelectorAll<HTMLElement>("section.client"));
+  const targets = sections.length ? sections : [body];
+  for (let i = 0; i < targets.length; i++) {
+    const canvas = await html2canvas(targets[i], { scale: 3, useCORS: true, backgroundColor: "#ffffff" });
+    const img = canvas.toDataURL("image/png");
+    const imgH = (canvas.height * pdfW) / canvas.width;
+    if (imgH <= pdfH) {
+      if (i > 0) pdf.addPage();
+      pdf.addImage(img, "PNG", 0, 0, pdfW, imgH, undefined, "FAST");
+    } else {
+      const pageCanvasH = (canvas.width * pdfH) / pdfW;
+      let y = 0; let first = true;
+      while (y < canvas.height) {
+        const sliceH = Math.min(pageCanvasH, canvas.height - y);
+        const c2 = document.createElement("canvas");
+        c2.width = canvas.width; c2.height = sliceH;
+        const ctx = c2.getContext("2d")!;
+        ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, c2.width, c2.height);
+        ctx.drawImage(canvas, 0, y, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
+        const slice = c2.toDataURL("image/png");
+        if (!first || i > 0) pdf.addPage();
+        first = false;
+        pdf.addImage(slice, "PNG", 0, 0, pdfW, (sliceH * pdfW) / canvas.width, undefined, "FAST");
+        y += sliceH;
+      }
+    }
+  }
+  document.body.removeChild(iframe);
+  pdf.save(`${title}-${fileDate()}.pdf`);
+}
+
 export function downloadStatementJSON(clientIds: string[], opts: { from?: string; to?: string; title?: string; mode?: "detailed" | "summary" } = {}) {
   const s = getState();
   const mode = opts.mode ?? "detailed";
