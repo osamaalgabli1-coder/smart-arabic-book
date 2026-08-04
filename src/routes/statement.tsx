@@ -109,6 +109,12 @@ function StatementPage() {
             try { await downloadStatementPDF(state.clients.map((c) => c.id), { from, to, title: "كشف-تفصيلي-كل-العملاء" }); toast.success("تم التنزيل"); }
             catch (e) { toast.error("تعذّر إنشاء PDF"); console.error(e); }
           }} />
+          <MiniBtn icon={<LayoutList className="w-4 h-4" />} label="PDF — كل العملاء إجمالي" onClick={async () => {
+            if (!state.clients.length) { toast.error("لا يوجد عملاء"); return; }
+            toast.info("جاري إنشاء PDF...");
+            try { await downloadAggregateStatementPDF({ title: "كشف-إجمالي-كل-العملاء" }); toast.success("تم التنزيل"); }
+            catch (e) { toast.error("تعذّر إنشاء PDF"); console.error(e); }
+          }} />
           <MiniBtn icon={<TrendingUp className="w-4 h-4" />} label="PDF — العملاء دائن (له)" onClick={async () => {
             const s = getState();
             const ids = s.clients.filter((c) => clientBalance(s, c.id) > 0).map((c) => c.id);
