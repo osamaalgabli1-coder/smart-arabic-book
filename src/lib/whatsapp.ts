@@ -92,8 +92,13 @@ export function sendWhatsapp(phone: string | undefined, message: string, opts?: 
     if (!opts?.silent) toast.error("لا يوجد رقم واتساب للعميل");
     return false;
   }
-  const url = `https://wa.me/${p}?text=${encodeURIComponent(message)}`;
-  window.open(url, "_blank");
+  const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
+  // على أنظمة الويندوز/الكمبيوتر: الإرسال مباشرة عبر جلسة واتساب ويب المفتوحة
+  const url = isMobile
+    ? `https://wa.me/${p}?text=${encodeURIComponent(message)}`
+    : `https://web.whatsapp.com/send?phone=${p}&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
+  window.open(url, "wa_send");
   return true;
 }
 
