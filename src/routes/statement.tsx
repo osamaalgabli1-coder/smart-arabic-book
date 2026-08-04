@@ -218,3 +218,12 @@ function StatementPage() {
     </AppShell>
   );
 }
+
+function MiniBtn({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick: () => void }) {
+  return (
+    <Button variant="outline" size="sm" onClick={onClick} className="h-auto py-2 px-2 justify-start gap-2 text-[11px] leading-tight">
+      <span className="text-primary shrink-0">{icon}</span>
+      <span className="font-bold text-right flex-1">{label}</span>
+    </Button>
+  );
+}
