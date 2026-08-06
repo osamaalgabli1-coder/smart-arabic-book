@@ -102,6 +102,42 @@ export function sendWhatsapp(phone: string | undefined, message: string, opts?: 
   return true;
 }
 
+// ————— إرسال مباشر لواتساب العميل بدون فتح واتساب —————
+// يتطلب ربط العميل بأداة إرسال (Webhook / CallMeBot). يدعم {message} و {phone} داخل الرابط.
+export async function sendDirectWhatsapp(
+  client: { phone?: string; waWebhook?: string; waApiKey?: string } | undefined,
+  message: string,
+  opts?: { silent?: boolean },
+): Promise<boolean> {
+  if (!client) return false;
+  const phone = normPhone(client.phone);
+  let hook = (client.waWebhook || "").trim();
+  const key = (client.waApiKey || "").trim();
+  // إن وُجد مفتاح CallMeBot فقط: نبني الرابط تلقائياً
+  if (!hook && key && phone) {
+    hook = `https://api.callmebot.com/whatsapp.php?phone=+${phone}&apikey=${encodeURIComponent(key)}&text={message}`;
+  }
+  if (!hook) return false;
+  try {
+    if (hook.includes("{message}")) {
+      const url = hook.replace("{phone}", phone).replace("{message}", encodeURIComponent(message));
+      await fetch(url, { mode: "no-cors" });
+    } else {
+      await fetch(hook, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, to: phone, message, text: message }),
+      });
+    }
+    if (!opts?.silent) toast.success("تم إرسال الإشعار تلقائياً إلى واتساب العميل");
+    return true;
+  } catch {
+    if (!opts?.silent) toast.error("تعذّر الإرسال التلقائي — تحقق من رابط الربط");
+    return false;
+  }
+}
+
 // رسالة إجمالي رصيد العميل — مدين عليكم / دائن لكم
 export function buildBalanceMessage(clientId: string): string {
   const s = getState();
@@ -183,13 +219,20 @@ export async function sendToGroup(client: { groupInviteLink?: string; groupWebho
 
 // إرسال الإشعار عبر القنوات المفعّلة للعميل (نصية / واتساب / مجموعة واتساب)
 export function notifyClient(
-  client: { phone?: string; notifySms?: boolean; notifyWhatsapp?: boolean; notifyGroup?: boolean; groupInviteLink?: string; groupWebhook?: string } | undefined,
+  client: { phone?: string; notifySms?: boolean; notifyWhatsapp?: boolean; notifyGroup?: boolean; groupInviteLink?: string; groupWebhook?: string; waWebhook?: string; waApiKey?: string } | undefined,
   message: string,
 ): void {
   if (!client) return;
   const any = client.notifySms || client.notifyWhatsapp || client.notifyGroup;
-  if (!any) { maybeAutoSend(client.phone, message); maybeSendSMS(client.phone, message); return; }
+  const hasDirect = Boolean((client.waWebhook || "").trim() || (client.waApiKey || "").trim());
+  if (!any) {
+    if (hasDirect) { void sendDirectWhatsapp(client, message, { silent: true }); return; }
+    maybeAutoSend(client.phone, message); maybeSendSMS(client.phone, message); return;
+  }
   if (client.notifyGroup) void sendToGroup(client, message);
-  if (client.notifyWhatsapp) sendWhatsapp(client.phone, message, { silent: true });
+  if (client.notifyWhatsapp) {
+    if (hasDirect) void sendDirectWhatsapp(client, message, { silent: true });
+    else sendWhatsapp(client.phone, message, { silent: true });
+  }
   if (client.notifySms) sendSMS(client.phone, message);
 }
