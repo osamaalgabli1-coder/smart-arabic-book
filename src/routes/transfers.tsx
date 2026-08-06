@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DescriptionField } from "@/components/DescriptionField";
 import { Plus, Trash2, Send, Pencil, MessageCircle } from "lucide-react";
 import { setState, useAppState, uid, formatCurrency, CURRENCIES, currencyLabels, currencySymbols, nextTransferNumber, getState, type Transfer, type Currency } from "@/lib/store";
-import { buildTransferMessage, sendWhatsapp, maybeAutoSend } from "@/lib/whatsapp";
+import { buildTransferMessage, sendWhatsapp, notifyClient } from "@/lib/whatsapp";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/transfers")({ component: TransfersPage });
@@ -48,7 +48,7 @@ function TransfersPage() {
     setOpen(false);
     if (record.clientId) {
       const client = getState().clients.find((c) => c.id === record.clientId);
-      if (client?.phone) maybeAutoSend(client.phone, buildTransferMessage(record));
+      notifyClient(client, buildTransferMessage(record));
     }
   };
 
