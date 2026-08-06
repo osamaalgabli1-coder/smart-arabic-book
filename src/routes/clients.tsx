@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Plus, Pencil, Trash2, Phone, Contact, MessageCircle, Users, MessageSquare, Bell } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { setState, useAppState, uid, clientBalance, formatCurrency, type Client } from "@/lib/store";
-import { buildBalanceMessage, sendWhatsapp, maybeSendSMS } from "@/lib/whatsapp";
+import { buildBalanceMessage, sendWhatsapp, maybeSendSMS, sendDirectWhatsapp } from "@/lib/whatsapp";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/clients")({ component: ClientsPage });
@@ -20,6 +20,7 @@ function ClientsPage() {
   const state = useAppState((s) => s);
   const [editing, setEditing] = useState<Client | null>(null);
   const [open, setOpen] = useState(false);
+  const [waClient, setWaClient] = useState<Client | null>(null);
 
   const startNew = () => { setEditing(null); setOpen(true); };
   const startEdit = (c: Client) => { setEditing(c); setOpen(true); };
@@ -53,11 +54,7 @@ function ClientsPage() {
                   {formatCurrency(bal)}
                 </div>
                 <div className="flex gap-1">
-                  <Button size="icon" variant="ghost" title="إرسال إجمالي الرصيد" onClick={() => {
-                    const msg = buildBalanceMessage(c.id);
-                    sendWhatsapp(c.phone, msg);
-                    maybeSendSMS(c.phone, msg);
-                  }}>
+                  <Button size="icon" variant="ghost" title="إرسال الإشعارات عبر واتساب" onClick={() => setWaClient(c)}>
                     <MessageCircle className="w-4 h-4 text-success" />
                   </Button>
                   <Button size="icon" variant="ghost" onClick={() => startEdit(c)}><Pencil className="w-4 h-4" /></Button>
@@ -70,7 +67,63 @@ function ClientsPage() {
       )}
 
       <ClientDialog open={open} onOpenChange={setOpen} initial={editing} />
+      <WhatsappLinkDialog client={waClient} onOpenChange={(v) => { if (!v) setWaClient(null); }} />
     </AppShell>
+  );
+}
+
+function WhatsappLinkDialog({ client, onOpenChange }: { client: Client | null; onOpenChange: (v: boolean) => void }) {
+  const [phone, setPhone] = useState("");
+  const [hook, setHook] = useState("");
+  const [apiKey, setApiKey] = useState("");
+
+  useEffect(() => {
+    if (client) {
+      setPhone(client.phone ?? "");
+      setHook(client.waWebhook ?? "");
+      setApiKey(client.waApiKey ?? "");
+    }
+  }, [client]);
+
+  const persist = () => {
+    if (!client) return null;
+    const updated: Client = { ...client, phone, waWebhook: hook, waApiKey: apiKey };
+    setState((s) => ({ ...s, clients: s.clients.map((c) => (c.id === client.id ? updated : c)) }));
+    return updated;
+  };
+
+  return (
+    <Dialog open={Boolean(client)} onOpenChange={onOpenChange}>
+      <DialogContent key={client?.id ?? "wa"}>
+        <DialogHeader><DialogTitle>ربط واتساب العميل وإرسال الإشعارات</DialogTitle></DialogHeader>
+        <div className="grid gap-3">
+          <F label="رقم واتساب العميل">
+            <Input dir="ltr" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="مثال: 771234567" />
+          </F>
+          <F label="مفتاح CallMeBot (إرسال تلقائي)">
+            <Input dir="ltr" value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder="123456" />
+          </F>
+          <F label="أو رابط أداة ربط مخصص (Webhook)">
+            <Input dir="ltr" value={hook} onChange={(e) => setHook(e.target.value)} placeholder="https://example.com/send?to={phone}&text={message}" />
+          </F>
+          <p className="text-[11px] text-muted-foreground leading-5">
+            عند إدخال المفتاح أو الرابط تُرسَل كل الإشعارات تلقائياً إلى واتساب العميل بدون فتح واتساب.
+            استخدم <span dir="ltr">{"{message}"}</span> و <span dir="ltr">{"{phone}"}</span> داخل الرابط المخصص.
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            <Button onClick={async () => {
+              const u = persist();
+              if (!u) return;
+              const msg = buildBalanceMessage(u.id);
+              const ok = await sendDirectWhatsapp(u, msg);
+              if (!ok) { sendWhatsapp(u.phone, msg); maybeSendSMS(u.phone, msg); }
+              onOpenChange(false);
+            }}>حفظ وإرسال الآن</Button>
+            <Button variant="outline" onClick={() => { persist(); toast.success("تم حفظ ربط واتساب"); onOpenChange(false); }}>حفظ فقط</Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
