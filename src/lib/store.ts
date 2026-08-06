@@ -28,6 +28,8 @@ export type Client = {
   notifyGroup?: boolean;
   groupInviteLink?: string; // رابط دعوة/محادثة مجموعة واتساب
   groupWebhook?: string; // أداة ربط تلقائي (CallMeBot / Webhook) — يدعم {message}
+  waWebhook?: string; // ربط واتساب العميل — إرسال تلقائي مباشر ({message} و {phone})
+  waApiKey?: string; // مفتاح CallMeBot للعميل (اختياري)
 };
 
 export type Cashbox = {
