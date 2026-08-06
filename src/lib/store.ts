@@ -22,6 +22,12 @@ export type Client = {
   openingBalance: number;
   openingCurrency?: Currency;
   photo?: string;
+  // إعدادات الرسائل والإشعارات
+  notifySms?: boolean;
+  notifyWhatsapp?: boolean;
+  notifyGroup?: boolean;
+  groupInviteLink?: string; // رابط دعوة/محادثة مجموعة واتساب
+  groupWebhook?: string; // أداة ربط تلقائي (CallMeBot / Webhook) — يدعم {message}
 };
 
 export type Cashbox = {
