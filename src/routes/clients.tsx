@@ -188,3 +188,12 @@ function ClientDialog({ open, onOpenChange, initial }: { open: boolean; onOpenCh
 function F({ label, children }: { label: string; children: React.ReactNode }) {
   return <div className="grid gap-1.5"><Label className="text-xs font-semibold">{label}</Label>{children}</div>;
 }
+
+function ChannelRow({ icon, label, checked, onChange }: { icon: React.ReactNode; label: string; checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center gap-2 text-sm font-semibold">{icon}{label}</div>
+      <Switch checked={checked} onCheckedChange={onChange} />
+    </div>
+  );
+}
