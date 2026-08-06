@@ -150,3 +150,46 @@ export function maybeSendSMS(phone: string | undefined, message: string): void {
   if (!phone) return;
   sendSMS(phone, message);
 }
+
+// ————— إرسال إلى مجموعة واتساب —————
+// إن وُجدت أداة ربط تلقائي (Webhook / CallMeBot) تُرسل الرسالة تلقائياً بدون فتح واتساب،
+// وإلا يُفتح رابط المجموعة مع نسخ نص الرسالة للحافظة للصقها.
+export async function sendToGroup(client: { groupInviteLink?: string; groupWebhook?: string }, message: string): Promise<boolean> {
+  const hook = (client.groupWebhook || "").trim();
+  if (hook) {
+    try {
+      if (hook.includes("{message}")) {
+        await fetch(hook.replace("{message}", encodeURIComponent(message)), { mode: "no-cors" });
+      } else {
+        await fetch(hook, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message, text: message }),
+        });
+      }
+      toast.success("تم إرسال الإشعار إلى مجموعة واتساب");
+      return true;
+    } catch {
+      toast.error("تعذّر الإرسال التلقائي إلى المجموعة");
+    }
+  }
+  const link = (client.groupInviteLink || "").trim();
+  if (!link) { toast.error("لم يتم ربط مجموعة واتساب لهذا العميل"); return false; }
+  try { await navigator.clipboard.writeText(message); toast.success("تم نسخ الرسالة — الصقها في المجموعة"); } catch { /* ignore */ }
+  window.open(link, "wa_group");
+  return true;
+}
+
+// إرسال الإشعار عبر القنوات المفعّلة للعميل (نصية / واتساب / مجموعة واتساب)
+export function notifyClient(
+  client: { phone?: string; notifySms?: boolean; notifyWhatsapp?: boolean; notifyGroup?: boolean; groupInviteLink?: string; groupWebhook?: string } | undefined,
+  message: string,
+): void {
+  if (!client) return;
+  const any = client.notifySms || client.notifyWhatsapp || client.notifyGroup;
+  if (!any) { maybeAutoSend(client.phone, message); maybeSendSMS(client.phone, message); return; }
+  if (client.notifyGroup) void sendToGroup(client, message);
+  if (client.notifyWhatsapp) sendWhatsapp(client.phone, message, { silent: true });
+  if (client.notifySms) sendSMS(client.phone, message);
+}

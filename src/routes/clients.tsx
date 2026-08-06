@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Phone, Contact, MessageCircle } from "lucide-react";
+import { Plus, Pencil, Trash2, Phone, Contact, MessageCircle, Users, MessageSquare, Bell } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { setState, useAppState, uid, clientBalance, formatCurrency, type Client } from "@/lib/store";
 import { buildBalanceMessage, sendWhatsapp, maybeSendSMS } from "@/lib/whatsapp";
 import { toast } from "sonner";
@@ -77,7 +78,7 @@ function ClientsPage() {
 type ContactsManager = { select: (props: string[], opts?: { multiple?: boolean }) => Promise<Array<{ tel?: string[]; name?: string[] }>> };
 
 function ClientDialog({ open, onOpenChange, initial }: { open: boolean; onOpenChange: (v: boolean) => void; initial: Client | null }) {
-  const emptyC: Client = { id: "", name: "", phone: "", address: "", notes: "", openingBalance: 0 };
+  const emptyC: Client = { id: "", name: "", phone: "", address: "", notes: "", openingBalance: 0, notifySms: false, notifyWhatsapp: true, notifyGroup: false, groupInviteLink: "", groupWebhook: "" };
   const [form, setForm] = useState<Client>(initial ?? emptyC);
   const key = initial?.id ?? "new";
 
@@ -147,6 +148,29 @@ function ClientDialog({ open, onOpenChange, initial }: { open: boolean; onOpenCh
             </div>
           </F>
           <F label="ملاحظات"><Textarea value={form.notes ?? ""} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></F>
+
+          <div className="border-2 border-border rounded-xl p-3 grid gap-3">
+            <div className="flex items-center gap-2 font-bold text-sm"><Bell className="w-4 h-4 text-primary" /> الرسائل والإشعارات</div>
+            <ChannelRow icon={<MessageSquare className="w-4 h-4 text-primary" />} label="رسالة نصية (SMS)" checked={Boolean(form.notifySms)} onChange={(v) => setForm({ ...form, notifySms: v })} />
+            <ChannelRow icon={<MessageCircle className="w-4 h-4 text-success" />} label="رسالة واتساب" checked={Boolean(form.notifyWhatsapp)} onChange={(v) => setForm({ ...form, notifyWhatsapp: v })} />
+            <ChannelRow icon={<Users className="w-4 h-4 text-success" />} label="رسالة إلى مجموعة واتساب" checked={Boolean(form.notifyGroup)} onChange={(v) => setForm({ ...form, notifyGroup: v })} />
+            {form.notifyGroup && (
+              <div className="grid gap-3 bg-accent/30 rounded-lg p-3">
+                <F label="رابط مجموعة واتساب (رابط الدعوة)">
+                  <Input dir="ltr" value={form.groupInviteLink ?? ""} onChange={(e) => setForm({ ...form, groupInviteLink: e.target.value })} placeholder="https://chat.whatsapp.com/XXXXXXXX" />
+                </F>
+                <F label="أداة الربط التلقائي (Webhook / CallMeBot)">
+                  <Input dir="ltr" value={form.groupWebhook ?? ""} onChange={(e) => setForm({ ...form, groupWebhook: e.target.value })} placeholder="https://api.callmebot.com/...&text={message}" />
+                </F>
+                <p className="text-[11px] text-muted-foreground leading-5">
+                  عند وضع رابط أداة الربط تُرسَل إشعارات السندات والحوالات تلقائياً إلى المجموعة بدون فتح واتساب.
+                  استخدم <span dir="ltr">{"{message}"}</span> في الرابط لموضع نص الرسالة، أو اترك الرابط بدونها ليتم الإرسال بطريقة POST بصيغة JSON.
+                  بدون أداة ربط: تُنسخ الرسالة تلقائياً ويُفتح رابط المجموعة للصقها.
+                </p>
+              </div>
+            )}
+          </div>
+
           <Button onClick={() => {
             if (!form.name.trim()) return;
             setState((s) => {
@@ -163,4 +187,13 @@ function ClientDialog({ open, onOpenChange, initial }: { open: boolean; onOpenCh
 
 function F({ label, children }: { label: string; children: React.ReactNode }) {
   return <div className="grid gap-1.5"><Label className="text-xs font-semibold">{label}</Label>{children}</div>;
+}
+
+function ChannelRow({ icon, label, checked, onChange }: { icon: React.ReactNode; label: string; checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center gap-2 text-sm font-semibold">{icon}{label}</div>
+      <Switch checked={checked} onCheckedChange={onChange} />
+    </div>
+  );
 }

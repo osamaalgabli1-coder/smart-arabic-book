@@ -6,11 +6,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { FileDown, Users, FileText, Download, Share2, MessageCircle, TrendingUp, TrendingDown, User, LayoutList } from "lucide-react";
+import { FileDown, Users, FileText, Download, TrendingUp, TrendingDown, User, LayoutList } from "lucide-react";
 import { toast } from "sonner";
 import { useAppState, getState, clientBalance, formatCurrency, clientLedger, formatNumber, formatBalanceNumber, currencyLabels, currencySymbols, CURRENCIES, type Currency } from "@/lib/store";
-import { openStatementPDF, openStatementPDFFile, downloadStatementHTML, downloadStatementPDF, sendClientStatementToWhatsapp, downloadAggregateStatementPDF } from "@/lib/statement-pdf";
-import { sendWhatsapp, buildBalanceMessage } from "@/lib/whatsapp";
+import { openStatementPDF, openStatementPDFFile, downloadStatementHTML, downloadStatementPDF, downloadAggregateStatementPDF } from "@/lib/statement-pdf";
 
 export const Route = createFileRoute("/statement")({ component: StatementPage });
 
@@ -130,21 +129,6 @@ function StatementPage() {
             toast.info("جاري إنشاء PDF...");
             try { await downloadStatementPDF(ids, { from, to, title: "كشف-العملاء-المدينين-عليه" }); toast.success("تم التنزيل"); }
             catch (e) { toast.error("تعذّر إنشاء PDF"); console.error(e); }
-          }} />
-          <MiniBtn icon={<Share2 className="w-4 h-4" />} label="مشاركة عبر واتساب" onClick={() => {
-            const s = getState();
-            const text = `كشف عملاء ${s.company.name}\n\n` + s.clients.map((c) => `• ${c.name}: ${formatCurrency(clientBalance(s, c.id))}`).join("\n");
-            window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
-          }} />
-          <MiniBtn icon={<MessageCircle className="w-4 h-4" />} label="إرسال كشف العميل PDF لواتساب" onClick={async () => {
-            if (!client) { toast.error("اختر عميلاً"); return; }
-            toast.info("جاري تجهيز الكشف...");
-            try {
-              const r = await sendClientStatementToWhatsapp(client.id, { from, to });
-              if (r === "shared") { toast.success("تمت المشاركة"); return; }
-              toast.success("تم تنزيل الكشف — أرفقه في المحادثة");
-              sendWhatsapp(client.phone, buildBalanceMessage(client.id));
-            } catch (e) { toast.error("تعذّر إنشاء PDF"); console.error(e); }
           }} />
         </div>
       </section>

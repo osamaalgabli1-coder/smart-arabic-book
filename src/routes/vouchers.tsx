@@ -14,7 +14,7 @@ import {
   currencyLabels, currencySymbols, CURRENCIES, nextVoucherNumber,
   type Voucher, type VoucherType, type Currency, getState,
 } from "@/lib/store";
-import { buildVoucherMessage, sendWhatsapp, maybeAutoSend } from "@/lib/whatsapp";
+import { buildVoucherMessage, sendWhatsapp, notifyClient } from "@/lib/whatsapp";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/vouchers")({ component: VouchersPage });
@@ -64,11 +64,11 @@ function VouchersPage() {
     // auto-send whatsapp
     if (needsClient) {
       const client = getState().clients.find((c) => c.id === record.clientId);
-      if (client?.phone) maybeAutoSend(client.phone, buildVoucherMessage(record, "from"));
+      notifyClient(client, buildVoucherMessage(record, "from"));
     }
     if (record.type === "compound") {
       const toClient = getState().clients.find((c) => c.id === record.toClientId);
-      if (toClient?.phone) maybeAutoSend(toClient.phone, buildVoucherMessage(record, "to"));
+      notifyClient(toClient, buildVoucherMessage(record, "to"));
     }
   };
 
