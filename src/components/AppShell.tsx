@@ -16,6 +16,7 @@ const menu = [
   { to: "/transfers", label: "الحوالات", icon: Send },
   { to: "/statement", label: "إدارة الحسابات", icon: FileText },
   { to: "/reports", label: "التقارير", icon: BarChart3 },
+  { to: "/whatsapp", label: "إشعارات WhatsApp Business", icon: MessageCircle },
   { to: "/backup", label: "النسخ الاحتياطي والاستعادة", icon: Upload },
   { to: "/company", label: "إعدادات الشركة", icon: Building2 },
   { to: "/settings", label: "الإعدادات", icon: Settings },
