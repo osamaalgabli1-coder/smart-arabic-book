@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WhatsappRouteImport } from './routes/whatsapp'
 import { Route as VouchersRouteImport } from './routes/vouchers'
 import { Route as TransfersRouteImport } from './routes/transfers'
 import { Route as StatementRouteImport } from './routes/statement'
@@ -25,6 +26,11 @@ import { Route as BackupRouteImport } from './routes/backup'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPublicWhatsappRouteImport } from './routes/api/public/whatsapp'
 
+const WhatsappRoute = WhatsappRouteImport.update({
+  id: '/whatsapp',
+  path: '/whatsapp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VouchersRoute = VouchersRouteImport.update({
   id: '/vouchers',
   path: '/vouchers',
@@ -116,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/statement': typeof StatementRoute
   '/transfers': typeof TransfersRoute
   '/vouchers': typeof VouchersRoute
+  '/whatsapp': typeof WhatsappRoute
   '/api/public/whatsapp': typeof ApiPublicWhatsappRoute
 }
 export interface FileRoutesByTo {
@@ -133,6 +140,7 @@ export interface FileRoutesByTo {
   '/statement': typeof StatementRoute
   '/transfers': typeof TransfersRoute
   '/vouchers': typeof VouchersRoute
+  '/whatsapp': typeof WhatsappRoute
   '/api/public/whatsapp': typeof ApiPublicWhatsappRoute
 }
 export interface FileRoutesById {
@@ -151,6 +159,7 @@ export interface FileRoutesById {
   '/statement': typeof StatementRoute
   '/transfers': typeof TransfersRoute
   '/vouchers': typeof VouchersRoute
+  '/whatsapp': typeof WhatsappRoute
   '/api/public/whatsapp': typeof ApiPublicWhatsappRoute
 }
 export interface FileRouteTypes {
@@ -170,6 +179,7 @@ export interface FileRouteTypes {
     | '/statement'
     | '/transfers'
     | '/vouchers'
+    | '/whatsapp'
     | '/api/public/whatsapp'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -187,6 +197,7 @@ export interface FileRouteTypes {
     | '/statement'
     | '/transfers'
     | '/vouchers'
+    | '/whatsapp'
     | '/api/public/whatsapp'
   id:
     | '__root__'
@@ -204,6 +215,7 @@ export interface FileRouteTypes {
     | '/statement'
     | '/transfers'
     | '/vouchers'
+    | '/whatsapp'
     | '/api/public/whatsapp'
   fileRoutesById: FileRoutesById
 }
@@ -222,11 +234,19 @@ export interface RootRouteChildren {
   StatementRoute: typeof StatementRoute
   TransfersRoute: typeof TransfersRoute
   VouchersRoute: typeof VouchersRoute
+  WhatsappRoute: typeof WhatsappRoute
   ApiPublicWhatsappRoute: typeof ApiPublicWhatsappRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/whatsapp': {
+      id: '/whatsapp'
+      path: '/whatsapp'
+      fullPath: '/whatsapp'
+      preLoaderRoute: typeof WhatsappRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/vouchers': {
       id: '/vouchers'
       path: '/vouchers'
@@ -350,8 +370,19 @@ const rootRouteChildren: RootRouteChildren = {
   StatementRoute: StatementRoute,
   TransfersRoute: TransfersRoute,
   VouchersRoute: VouchersRoute,
+  WhatsappRoute: WhatsappRoute,
   ApiPublicWhatsappRoute: ApiPublicWhatsappRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
