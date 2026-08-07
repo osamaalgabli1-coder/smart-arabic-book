@@ -1,5 +1,6 @@
 import { getState, formatCurrency, voucherTypeLabels, clientBalances, companyDisplayName, CURRENCIES, type Voucher, type Transfer, type Currency } from "@/lib/store";
 import { toast } from "sonner";
+import { sendWaBusinessMessage } from "@/lib/wa-business.functions";
 
 function normPhone(p?: string): string {
   if (!p) return "";
@@ -218,21 +219,59 @@ export async function sendToGroup(client: { groupInviteLink?: string; groupWebho
 }
 
 // إرسال الإشعار عبر القنوات المفعّلة للعميل (نصية / واتساب / مجموعة واتساب)
+// إرسال فوري عبر WhatsApp Business (ميتا) — بدون فتح واتساب إطلاقاً
+export async function sendCloudWhatsapp(
+  client: { id?: string; name?: string; phone?: string } | undefined,
+  message: string,
+  opts?: { silent?: boolean; refNumber?: string },
+): Promise<boolean> {
+  if (!client?.phone) return false;
+  try {
+    const res = await sendWaBusinessMessage({
+      data: {
+        message,
+        phone: client.phone,
+        clientId: client.id ?? "",
+        clientName: client.name ?? "",
+        refNumber: opts?.refNumber ?? "",
+      },
+    });
+    if (res.ok) {
+      if (!opts?.silent) toast.success("تم إرسال الإشعار فوراً عبر WhatsApp Business");
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+// إرسال الإشعار عبر القنوات المفعّلة للعميل (WhatsApp Business أولاً ثم البدائل)
 export function notifyClient(
-  client: { phone?: string; notifySms?: boolean; notifyWhatsapp?: boolean; notifyGroup?: boolean; groupInviteLink?: string; groupWebhook?: string; waWebhook?: string; waApiKey?: string } | undefined,
+  client: { id?: string; name?: string; phone?: string; notifySms?: boolean; notifyWhatsapp?: boolean; notifyGroup?: boolean; groupInviteLink?: string; groupWebhook?: string; waWebhook?: string; waApiKey?: string } | undefined,
   message: string,
 ): void {
   if (!client) return;
   const any = client.notifySms || client.notifyWhatsapp || client.notifyGroup;
   const hasDirect = Boolean((client.waWebhook || "").trim() || (client.waApiKey || "").trim());
-  if (!any) {
-    if (hasDirect) { void sendDirectWhatsapp(client, message, { silent: true }); return; }
-    maybeAutoSend(client.phone, message); maybeSendSMS(client.phone, message); return;
-  }
-  if (client.notifyGroup) void sendToGroup(client, message);
-  if (client.notifyWhatsapp) {
-    if (hasDirect) void sendDirectWhatsapp(client, message, { silent: true });
-    else sendWhatsapp(client.phone, message, { silent: true });
-  }
-  if (client.notifySms) sendSMS(client.phone, message);
+
+  void (async () => {
+    // 1) القناة الرسمية: WhatsApp Business Cloud API عبر الخادم — إرسال فوري
+    const sent = await sendCloudWhatsapp(client, message, { silent: true });
+    if (sent) {
+      if (client.notifyGroup) void sendToGroup(client, message);
+      return;
+    }
+    // 2) البدائل عند عدم تفعيل الربط الرسمي
+    if (!any) {
+      if (hasDirect) { void sendDirectWhatsapp(client, message, { silent: true }); return; }
+      maybeAutoSend(client.phone, message); maybeSendSMS(client.phone, message); return;
+    }
+    if (client.notifyGroup) void sendToGroup(client, message);
+    if (client.notifyWhatsapp) {
+      if (hasDirect) void sendDirectWhatsapp(client, message, { silent: true });
+      else sendWhatsapp(client.phone, message, { silent: true });
+    }
+    if (client.notifySms) sendSMS(client.phone, message);
+  })();
 }
