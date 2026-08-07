@@ -14,7 +14,168 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      wa_config: {
+        Row: {
+          access_token: string | null
+          api_version: string
+          business_account_id: string | null
+          created_at: string
+          default_lang: string
+          default_template: string | null
+          enabled: boolean
+          id: string
+          phone_number_id: string | null
+          updated_at: string
+          webhook_verify_token: string | null
+        }
+        Insert: {
+          access_token?: string | null
+          api_version?: string
+          business_account_id?: string | null
+          created_at?: string
+          default_lang?: string
+          default_template?: string | null
+          enabled?: boolean
+          id?: string
+          phone_number_id?: string | null
+          updated_at?: string
+          webhook_verify_token?: string | null
+        }
+        Update: {
+          access_token?: string | null
+          api_version?: string
+          business_account_id?: string | null
+          created_at?: string
+          default_lang?: string
+          default_template?: string | null
+          enabled?: boolean
+          id?: string
+          phone_number_id?: string | null
+          updated_at?: string
+          webhook_verify_token?: string | null
+        }
+        Relationships: []
+      }
+      wa_events: {
+        Row: {
+          created_at: string
+          event_type: string | null
+          from_phone: string | null
+          id: string
+          payload: Json
+          provider_message_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type?: string | null
+          from_phone?: string | null
+          id?: string
+          payload: Json
+          provider_message_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string | null
+          from_phone?: string | null
+          id?: string
+          payload?: Json
+          provider_message_id?: string | null
+        }
+        Relationships: []
+      }
+      wa_messages: {
+        Row: {
+          body: string
+          channel: string
+          client_id: string | null
+          client_name: string | null
+          created_at: string
+          error: string | null
+          group_id: string | null
+          id: string
+          kind: string
+          provider_message_id: string | null
+          ref_number: string | null
+          status: string
+          to_phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          channel?: string
+          client_id?: string | null
+          client_name?: string | null
+          created_at?: string
+          error?: string | null
+          group_id?: string | null
+          id?: string
+          kind?: string
+          provider_message_id?: string | null
+          ref_number?: string | null
+          status?: string
+          to_phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          channel?: string
+          client_id?: string | null
+          client_name?: string | null
+          created_at?: string
+          error?: string | null
+          group_id?: string | null
+          id?: string
+          kind?: string
+          provider_message_id?: string | null
+          ref_number?: string | null
+          status?: string
+          to_phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      wa_recipients: {
+        Row: {
+          active: boolean
+          client_id: string
+          client_name: string | null
+          created_at: string
+          group_id: string | null
+          group_link: string | null
+          id: string
+          notify_group: boolean
+          notify_whatsapp: boolean
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          client_id: string
+          client_name?: string | null
+          created_at?: string
+          group_id?: string | null
+          group_link?: string | null
+          id?: string
+          notify_group?: boolean
+          notify_whatsapp?: boolean
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          client_id?: string
+          client_name?: string | null
+          created_at?: string
+          group_id?: string | null
+          group_link?: string | null
+          id?: string
+          notify_group?: boolean
+          notify_whatsapp?: boolean
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
