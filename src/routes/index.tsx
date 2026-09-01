@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import {
   Users, Wallet, FileText, Send, ClipboardList, BarChart3,
-  Building2,
+  Building2, Tags,
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { useAppState, formatCurrency, sumCashboxesByCurrency, sumClientsByCurrency, CURRENCIES, currencySymbols } from "@/lib/store";
@@ -12,7 +12,8 @@ export const Route = createFileRoute("/")({
 });
 
 const cards = [
-  { to: "/clients", label: "إضافة العملاء", icon: Users, tone: "text-primary" },
+  { to: "/clients", label: "إضافة السادة العملاء", icon: Users, tone: "text-primary" },
+  { to: "/categories", label: "تصنيفات العملاء", icon: Tags, tone: "text-primary" },
   { to: "/cashboxes", label: "إضافة الصناديق", icon: Wallet, tone: "text-primary" },
   { to: "/vouchers", label: "إضافة سند جديد", icon: FileText, tone: "text-success" },
   { to: "/transfers", label: "إضافة حوالة جديدة", icon: Send, tone: "text-success" },

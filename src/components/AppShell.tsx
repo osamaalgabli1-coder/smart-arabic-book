@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, Home, Users, Wallet, FileText, Send, BarChart3, Settings, Upload, Building2, X, MessageCircle, Phone, HardDriveUpload, Lock, ArrowRight } from "lucide-react";
+import { Menu, Home, Users, Search, Tags, Wallet, FileText, Send, BarChart3, Settings, Upload, Building2, X, MessageCircle, Phone, HardDriveUpload, Lock, ArrowRight } from "lucide-react";
 import { useRouter } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
 import { useAppState } from "@/lib/store";
@@ -10,7 +10,9 @@ import { toast } from "sonner";
 
 const menu = [
   { to: "/", label: "الرئيسية", icon: Home },
-  { to: "/clients", label: "العملاء", icon: Users },
+  { to: "/clients", label: "السادة العملاء", icon: Users },
+  { to: "/categories", label: "تصنيفات العملاء", icon: Tags },
+  { to: "/search", label: "البحث الشامل", icon: Search },
   { to: "/cashboxes", label: "الصناديق", icon: Wallet },
   { to: "/vouchers", label: "السندات والقيود", icon: FileText },
   { to: "/transfers", label: "الحوالات", icon: Send },
@@ -24,6 +26,7 @@ const menu = [
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const [q, setQ] = useState("");
   const path = useRouterState({ select: (s) => s.location.pathname });
   const router = useRouter();
   const isHome = path === "/";
@@ -67,6 +70,24 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
         <div className="bg-destructive text-destructive-foreground text-center text-xs py-1.5 font-semibold">
           {company.name} — نظام محاسبي عربي متكامل
+        </div>
+        <div className="bg-card/95 px-3 py-2">
+          <form
+            className="max-w-5xl mx-auto flex items-center gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void router.navigate({ to: "/search", search: { q } });
+            }}
+          >
+            <Search className="w-4 h-4 text-muted-foreground shrink-0" />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="بحث بالبيان أو المبلغ أو اسم السيد..."
+              className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
+              aria-label="بحث"
+            />
+          </form>
         </div>
       </header>
 

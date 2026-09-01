@@ -30,6 +30,16 @@ export type Client = {
   groupWebhook?: string; // أداة ربط تلقائي (CallMeBot / Webhook) — يدعم {message}
   waWebhook?: string; // ربط واتساب العميل — إرسال تلقائي مباشر ({message} و {phone})
   waApiKey?: string; // مفتاح CallMeBot للعميل (اختياري)
+  // سقف المديونية — عند بلوغه تتوقف العمليات على العميل (0 أو فارغ = بدون سقف)
+  creditLimit?: number;
+  creditLimitCurrency?: Currency;
+  // تصنيف العميل
+  categoryId?: string;
+};
+
+export type ClientCategory = {
+  id: string;
+  name: string;
 };
 
 export type Cashbox = {
@@ -111,6 +121,7 @@ export type AppSettings = {
 
 export type AppState = {
   clients: Client[];
+  categories: ClientCategory[];
   cashboxes: Cashbox[];
   vouchers: Voucher[];
   transfers: Transfer[];
@@ -120,8 +131,15 @@ export type AppState = {
 
 const KEY = "muhaseb-app-state-v1";
 
+export const defaultCategories: ClientCategory[] = [
+  { id: "general", name: "عام" },
+  { id: "customers", name: "عملاء" },
+  { id: "suppliers", name: "موردين" },
+];
+
 const initialState: AppState = {
   clients: [],
+  categories: defaultCategories,
   cashboxes: [{ id: "main", name: "الصندوق الرئيسي", type: "main", openingBalance: 0, currency: "YER" }],
   vouchers: [],
   transfers: [],
@@ -143,6 +161,7 @@ function load(): AppState {
     parsed.vouchers = (parsed.vouchers ?? []).map((v: Voucher, i: number) => ({ ...v, currency: v.currency ?? "YER", number: v.number ?? String(i + 1).padStart(4, "0") }));
     parsed.transfers = (parsed.transfers ?? []).map((t: Transfer) => ({ ...t, currency: t.currency ?? "YER" }));
     parsed.settings = { ...initialState.settings, ...(parsed.settings ?? {}) };
+    parsed.categories = (parsed.categories ?? []).length ? parsed.categories : defaultCategories;
     parsed.company = { ...(parsed.company ?? {}) };
     if (!parsed.company.name || parsed.company.name === "شركتي") parsed.company.name = initialState.company.name;
     return parsed;
@@ -381,4 +400,33 @@ export function nextTransferNumber(state: AppState): string {
     return Math.max(m, n);
   }, 0);
   return `HW-${String(max + 1).padStart(4, "0")}`;
+}
+
+// ---------- سقف المديونية ----------
+// الرصيد الداخلي السالب يعني "على العميل" (مديونية)
+export function clientDebt(state: AppState, clientId: string, currency: Currency): number {
+  const b = clientBalances(state, clientId);
+  return Math.max(0, -(b[currency] || 0));
+}
+
+export type LimitCheck = { blocked: boolean; limit: number; debt: number; after: number };
+
+// يتحقق إن كانت العملية ستتجاوز سقف مديونية العميل
+export function checkCreditLimit(
+  state: AppState,
+  clientId: string | undefined,
+  currency: Currency,
+  addedDebit: number,
+): LimitCheck {
+  const c = clientId ? state.clients.find((x) => x.id === clientId) : undefined;
+  const limit = Number(c?.creditLimit || 0);
+  const cur = c?.creditLimitCurrency ?? currency;
+  const debt = c ? clientDebt(state, c.id, currency) : 0;
+  const after = debt + Math.max(0, addedDebit);
+  if (!c || limit <= 0 || cur !== currency) return { blocked: false, limit, debt, after };
+  return { blocked: after > limit, limit, debt, after };
+}
+
+export function categoryName(state: AppState, id?: string): string {
+  return state.categories.find((c) => c.id === id)?.name ?? "بدون تصنيف";
 }

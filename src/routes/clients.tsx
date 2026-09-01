@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, Phone, Contact, MessageCircle, Users, MessageSquare, Bell } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-import { setState, useAppState, uid, clientBalance, formatCurrency, type Client } from "@/lib/store";
+import { setState, useAppState, uid, clientBalance, formatCurrency, categoryName, CURRENCIES, currencyLabels, type Client, type Currency } from "@/lib/store";
 import { buildBalanceMessage, sendWhatsapp, maybeSendSMS, sendDirectWhatsapp } from "@/lib/whatsapp";
 import { toast } from "sonner";
 
@@ -25,14 +25,14 @@ function ClientsPage() {
   const startNew = () => { setEditing(null); setOpen(true); };
   const startEdit = (c: Client) => { setEditing(c); setOpen(true); };
   const remove = (id: string) => {
-    if (!confirm("حذف العميل؟")) return;
+    if (!confirm("حذف السيد؟")) return;
     setState((s) => ({ ...s, clients: s.clients.filter((c) => c.id !== id) }));
   };
 
   return (
     <AppShell>
-      <PageHeader title="إدارة العملاء" subtitle="إضافة وتعديل وحذف العملاء" actions={
-        <Button onClick={startNew}><Plus className="w-4 h-4 ml-1" /> عميل جديد</Button>
+      <PageHeader title="إدارة السادة العملاء" subtitle="إضافة وتعديل وحذف السادة العملاء" actions={
+        <Button onClick={startNew}><Plus className="w-4 h-4 ml-1" /> سيد جديد</Button>
       } />
 
       {clients.length === 0 ? (
@@ -48,6 +48,7 @@ function ClientsPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-bold truncate">{c.name}</div>
+                  <div className="text-[10px] text-muted-foreground">{categoryName(state, c.categoryId)}{c.creditLimit ? ` • سقف: ${formatCurrency(c.creditLimit, c.creditLimitCurrency ?? "YER")}` : ""}</div>
                   {c.phone && <div className="text-xs text-muted-foreground flex items-center gap-1"><Phone className="w-3 h-3" />{c.phone}</div>}
                 </div>
                 <div className={`text-sm font-bold ${bal >= 0 ? "text-success" : "text-destructive"}`}>
@@ -132,6 +133,7 @@ type ContactsManager = { select: (props: string[], opts?: { multiple?: boolean }
 
 function ClientDialog({ open, onOpenChange, initial }: { open: boolean; onOpenChange: (v: boolean) => void; initial: Client | null }) {
   const emptyC: Client = { id: "", name: "", phone: "", address: "", notes: "", openingBalance: 0, notifySms: false, notifyWhatsapp: true, notifyGroup: false, groupInviteLink: "", groupWebhook: "" };
+  const categories = useAppState((s) => s.categories);
   const [form, setForm] = useState<Client>(initial ?? emptyC);
   const key = initial?.id ?? "new";
 
@@ -161,9 +163,37 @@ function ClientDialog({ open, onOpenChange, initial }: { open: boolean; onOpenCh
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent key={key}>
-        <DialogHeader><DialogTitle>{initial ? "تعديل عميل" : "عميل جديد"}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{initial ? "تعديل بيانات السيد" : "سيد جديد"}</DialogTitle></DialogHeader>
         <div className="grid gap-3">
-          <F label="اسم العميل"><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></F>
+          <F label="اسم السيد"><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></F>
+          <F label="التصنيف">
+            <select
+              className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+              value={form.categoryId ?? categories[0]?.id ?? ""}
+              onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
+            >
+              {categories.map((c) => (<option key={c.id} value={c.id}>{c.name}</option>))}
+            </select>
+          </F>
+          <F label="سقف المديونية (0 = بدون سقف)">
+            <div className="flex gap-2">
+              <Input
+                type="number"
+                inputMode="decimal"
+                placeholder="0"
+                value={form.creditLimit ? form.creditLimit : ""}
+                onChange={(e) => setForm({ ...form, creditLimit: Number(e.target.value) || 0 })}
+              />
+              <select
+                className="h-10 rounded-md border border-input bg-background px-2 text-xs"
+                value={form.creditLimitCurrency ?? "YER"}
+                onChange={(e) => setForm({ ...form, creditLimitCurrency: e.target.value as Currency })}
+              >
+                {CURRENCIES.map((c) => (<option key={c} value={c}>{currencyLabels[c]}</option>))}
+              </select>
+            </div>
+          </F>
+          <p className="text-[11px] text-muted-foreground -mt-1">عند بلوغ السقف يتم إيقاف العمليات التي تزيد مديونية السيد.</p>
           <F label="رقم الهاتف">
             <div className="flex gap-2">
               <Input value={form.phone ?? ""} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="مثال: 771234567" />

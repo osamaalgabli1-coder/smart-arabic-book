@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
 import { Moon, Sun, Trash2, MessageCircle, MessageSquare, Lock, Send } from "lucide-react";
-import { setState, useAppState } from "@/lib/store";
+import { setState, useAppState, defaultCategories } from "@/lib/store";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/settings")({ component: SettingsPage });
@@ -118,7 +118,7 @@ function SettingsPage() {
           </div>
           <Button variant="destructive" onClick={() => {
             if (!confirm("مسح كل البيانات؟")) return;
-            setState(() => ({ clients: [], cashboxes: [{ id: "main", name: "الصندوق الرئيسي", type: "main", openingBalance: 0, currency: "YER" }], vouchers: [], transfers: [], company: { name: "شركتي" }, settings: { whatsappAutoSend: false } }));
+            setState(() => ({ clients: [], categories: defaultCategories, cashboxes: [{ id: "main", name: "الصندوق الرئيسي", type: "main", openingBalance: 0, currency: "YER" }], vouchers: [], transfers: [], company: { name: "شركتي" }, settings: { whatsappAutoSend: false } }));
             toast.success("تم مسح البيانات");
           }}>
             <Trash2 className="w-4 h-4 ml-1" /> مسح

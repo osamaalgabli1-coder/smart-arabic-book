@@ -15,11 +15,13 @@ import { Route as TransfersRouteImport } from './routes/transfers'
 import { Route as StatementRouteImport } from './routes/statement'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as ExportRouteImport } from './routes/export'
 import { Route as CustomizeRouteImport } from './routes/customize'
 import { Route as CompanyRouteImport } from './routes/company'
 import { Route as ClientsRouteImport } from './routes/clients'
+import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as CashboxesRouteImport } from './routes/cashboxes'
 import { Route as BuildAppRouteImport } from './routes/build-app'
 import { Route as BackupRouteImport } from './routes/backup'
@@ -56,6 +58,11 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReportsRoute = ReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
@@ -79,6 +86,11 @@ const CompanyRoute = CompanyRouteImport.update({
 const ClientsRoute = ClientsRouteImport.update({
   id: '/clients',
   path: '/clients',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoriesRoute = CategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CashboxesRoute = CashboxesRouteImport.update({
@@ -112,11 +124,13 @@ export interface FileRoutesByFullPath {
   '/backup': typeof BackupRoute
   '/build-app': typeof BuildAppRoute
   '/cashboxes': typeof CashboxesRoute
+  '/categories': typeof CategoriesRoute
   '/clients': typeof ClientsRoute
   '/company': typeof CompanyRoute
   '/customize': typeof CustomizeRoute
   '/export': typeof ExportRoute
   '/reports': typeof ReportsRoute
+  '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/statement': typeof StatementRoute
@@ -130,11 +144,13 @@ export interface FileRoutesByTo {
   '/backup': typeof BackupRoute
   '/build-app': typeof BuildAppRoute
   '/cashboxes': typeof CashboxesRoute
+  '/categories': typeof CategoriesRoute
   '/clients': typeof ClientsRoute
   '/company': typeof CompanyRoute
   '/customize': typeof CustomizeRoute
   '/export': typeof ExportRoute
   '/reports': typeof ReportsRoute
+  '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/statement': typeof StatementRoute
@@ -149,11 +165,13 @@ export interface FileRoutesById {
   '/backup': typeof BackupRoute
   '/build-app': typeof BuildAppRoute
   '/cashboxes': typeof CashboxesRoute
+  '/categories': typeof CategoriesRoute
   '/clients': typeof ClientsRoute
   '/company': typeof CompanyRoute
   '/customize': typeof CustomizeRoute
   '/export': typeof ExportRoute
   '/reports': typeof ReportsRoute
+  '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/statement': typeof StatementRoute
@@ -169,11 +187,13 @@ export interface FileRouteTypes {
     | '/backup'
     | '/build-app'
     | '/cashboxes'
+    | '/categories'
     | '/clients'
     | '/company'
     | '/customize'
     | '/export'
     | '/reports'
+    | '/search'
     | '/settings'
     | '/sitemap.xml'
     | '/statement'
@@ -187,11 +207,13 @@ export interface FileRouteTypes {
     | '/backup'
     | '/build-app'
     | '/cashboxes'
+    | '/categories'
     | '/clients'
     | '/company'
     | '/customize'
     | '/export'
     | '/reports'
+    | '/search'
     | '/settings'
     | '/sitemap.xml'
     | '/statement'
@@ -205,11 +227,13 @@ export interface FileRouteTypes {
     | '/backup'
     | '/build-app'
     | '/cashboxes'
+    | '/categories'
     | '/clients'
     | '/company'
     | '/customize'
     | '/export'
     | '/reports'
+    | '/search'
     | '/settings'
     | '/sitemap.xml'
     | '/statement'
@@ -224,11 +248,13 @@ export interface RootRouteChildren {
   BackupRoute: typeof BackupRoute
   BuildAppRoute: typeof BuildAppRoute
   CashboxesRoute: typeof CashboxesRoute
+  CategoriesRoute: typeof CategoriesRoute
   ClientsRoute: typeof ClientsRoute
   CompanyRoute: typeof CompanyRoute
   CustomizeRoute: typeof CustomizeRoute
   ExportRoute: typeof ExportRoute
   ReportsRoute: typeof ReportsRoute
+  SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StatementRoute: typeof StatementRoute
@@ -282,6 +308,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reports': {
       id: '/reports'
       path: '/reports'
@@ -315,6 +348,13 @@ declare module '@tanstack/react-router' {
       path: '/clients'
       fullPath: '/clients'
       preLoaderRoute: typeof ClientsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/categories': {
+      id: '/categories'
+      path: '/categories'
+      fullPath: '/categories'
+      preLoaderRoute: typeof CategoriesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cashboxes': {
@@ -360,11 +400,13 @@ const rootRouteChildren: RootRouteChildren = {
   BackupRoute: BackupRoute,
   BuildAppRoute: BuildAppRoute,
   CashboxesRoute: CashboxesRoute,
+  CategoriesRoute: CategoriesRoute,
   ClientsRoute: ClientsRoute,
   CompanyRoute: CompanyRoute,
   CustomizeRoute: CustomizeRoute,
   ExportRoute: ExportRoute,
   ReportsRoute: ReportsRoute,
+  SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   StatementRoute: StatementRoute,
@@ -376,3 +418,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
