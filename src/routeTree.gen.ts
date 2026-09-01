@@ -15,6 +15,7 @@ import { Route as TransfersRouteImport } from './routes/transfers'
 import { Route as StatementRouteImport } from './routes/statement'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as ExportRouteImport } from './routes/export'
 import { Route as CustomizeRouteImport } from './routes/customize'
@@ -54,6 +55,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportsRoute = ReportsRouteImport.update({
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/customize': typeof CustomizeRoute
   '/export': typeof ExportRoute
   '/reports': typeof ReportsRoute
+  '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/statement': typeof StatementRoute
@@ -135,6 +142,7 @@ export interface FileRoutesByTo {
   '/customize': typeof CustomizeRoute
   '/export': typeof ExportRoute
   '/reports': typeof ReportsRoute
+  '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/statement': typeof StatementRoute
@@ -154,6 +162,7 @@ export interface FileRoutesById {
   '/customize': typeof CustomizeRoute
   '/export': typeof ExportRoute
   '/reports': typeof ReportsRoute
+  '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/statement': typeof StatementRoute
@@ -174,6 +183,7 @@ export interface FileRouteTypes {
     | '/customize'
     | '/export'
     | '/reports'
+    | '/search'
     | '/settings'
     | '/sitemap.xml'
     | '/statement'
@@ -192,6 +202,7 @@ export interface FileRouteTypes {
     | '/customize'
     | '/export'
     | '/reports'
+    | '/search'
     | '/settings'
     | '/sitemap.xml'
     | '/statement'
@@ -210,6 +221,7 @@ export interface FileRouteTypes {
     | '/customize'
     | '/export'
     | '/reports'
+    | '/search'
     | '/settings'
     | '/sitemap.xml'
     | '/statement'
@@ -229,6 +241,7 @@ export interface RootRouteChildren {
   CustomizeRoute: typeof CustomizeRoute
   ExportRoute: typeof ExportRoute
   ReportsRoute: typeof ReportsRoute
+  SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StatementRoute: typeof StatementRoute
@@ -280,6 +293,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reports': {
@@ -365,6 +385,7 @@ const rootRouteChildren: RootRouteChildren = {
   CustomizeRoute: CustomizeRoute,
   ExportRoute: ExportRoute,
   ReportsRoute: ReportsRoute,
+  SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   StatementRoute: StatementRoute,
