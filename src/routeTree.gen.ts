@@ -21,6 +21,7 @@ import { Route as ExportRouteImport } from './routes/export'
 import { Route as CustomizeRouteImport } from './routes/customize'
 import { Route as CompanyRouteImport } from './routes/company'
 import { Route as ClientsRouteImport } from './routes/clients'
+import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as CashboxesRouteImport } from './routes/cashboxes'
 import { Route as BuildAppRouteImport } from './routes/build-app'
 import { Route as BackupRouteImport } from './routes/backup'
@@ -87,6 +88,11 @@ const ClientsRoute = ClientsRouteImport.update({
   path: '/clients',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CategoriesRoute = CategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CashboxesRoute = CashboxesRouteImport.update({
   id: '/cashboxes',
   path: '/cashboxes',
@@ -118,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/backup': typeof BackupRoute
   '/build-app': typeof BuildAppRoute
   '/cashboxes': typeof CashboxesRoute
+  '/categories': typeof CategoriesRoute
   '/clients': typeof ClientsRoute
   '/company': typeof CompanyRoute
   '/customize': typeof CustomizeRoute
@@ -137,6 +144,7 @@ export interface FileRoutesByTo {
   '/backup': typeof BackupRoute
   '/build-app': typeof BuildAppRoute
   '/cashboxes': typeof CashboxesRoute
+  '/categories': typeof CategoriesRoute
   '/clients': typeof ClientsRoute
   '/company': typeof CompanyRoute
   '/customize': typeof CustomizeRoute
@@ -157,6 +165,7 @@ export interface FileRoutesById {
   '/backup': typeof BackupRoute
   '/build-app': typeof BuildAppRoute
   '/cashboxes': typeof CashboxesRoute
+  '/categories': typeof CategoriesRoute
   '/clients': typeof ClientsRoute
   '/company': typeof CompanyRoute
   '/customize': typeof CustomizeRoute
@@ -178,6 +187,7 @@ export interface FileRouteTypes {
     | '/backup'
     | '/build-app'
     | '/cashboxes'
+    | '/categories'
     | '/clients'
     | '/company'
     | '/customize'
@@ -197,6 +207,7 @@ export interface FileRouteTypes {
     | '/backup'
     | '/build-app'
     | '/cashboxes'
+    | '/categories'
     | '/clients'
     | '/company'
     | '/customize'
@@ -216,6 +227,7 @@ export interface FileRouteTypes {
     | '/backup'
     | '/build-app'
     | '/cashboxes'
+    | '/categories'
     | '/clients'
     | '/company'
     | '/customize'
@@ -236,6 +248,7 @@ export interface RootRouteChildren {
   BackupRoute: typeof BackupRoute
   BuildAppRoute: typeof BuildAppRoute
   CashboxesRoute: typeof CashboxesRoute
+  CategoriesRoute: typeof CategoriesRoute
   ClientsRoute: typeof ClientsRoute
   CompanyRoute: typeof CompanyRoute
   CustomizeRoute: typeof CustomizeRoute
@@ -337,6 +350,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/categories': {
+      id: '/categories'
+      path: '/categories'
+      fullPath: '/categories'
+      preLoaderRoute: typeof CategoriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/cashboxes': {
       id: '/cashboxes'
       path: '/cashboxes'
@@ -380,6 +400,7 @@ const rootRouteChildren: RootRouteChildren = {
   BackupRoute: BackupRoute,
   BuildAppRoute: BuildAppRoute,
   CashboxesRoute: CashboxesRoute,
+  CategoriesRoute: CategoriesRoute,
   ClientsRoute: ClientsRoute,
   CompanyRoute: CompanyRoute,
   CustomizeRoute: CustomizeRoute,
