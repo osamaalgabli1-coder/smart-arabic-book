@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
 import { Moon, Sun, Trash2, MessageCircle, MessageSquare, Lock, Send } from "lucide-react";
-import { setState, useAppState } from "@/lib/store";
+import { setState, useAppState, defaultCategories } from "@/lib/store";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/settings")({ component: SettingsPage });
