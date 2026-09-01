@@ -121,6 +121,7 @@ export type AppSettings = {
 
 export type AppState = {
   clients: Client[];
+  categories: ClientCategory[];
   cashboxes: Cashbox[];
   vouchers: Voucher[];
   transfers: Transfer[];
@@ -130,8 +131,15 @@ export type AppState = {
 
 const KEY = "muhaseb-app-state-v1";
 
+export const defaultCategories: ClientCategory[] = [
+  { id: "general", name: "عام" },
+  { id: "customers", name: "عملاء" },
+  { id: "suppliers", name: "موردين" },
+];
+
 const initialState: AppState = {
   clients: [],
+  categories: defaultCategories,
   cashboxes: [{ id: "main", name: "الصندوق الرئيسي", type: "main", openingBalance: 0, currency: "YER" }],
   vouchers: [],
   transfers: [],
