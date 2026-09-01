@@ -118,7 +118,7 @@ function SettingsPage() {
           </div>
           <Button variant="destructive" onClick={() => {
             if (!confirm("مسح كل البيانات؟")) return;
-            setState(() => ({ clients: [], cashboxes: [{ id: "main", name: "الصندوق الرئيسي", type: "main", openingBalance: 0, currency: "YER" }], vouchers: [], transfers: [], company: { name: "شركتي" }, settings: { whatsappAutoSend: false } }));
+            setState(() => ({ clients: [], categories: defaultCategories, cashboxes: [{ id: "main", name: "الصندوق الرئيسي", type: "main", openingBalance: 0, currency: "YER" }], vouchers: [], transfers: [], company: { name: "شركتي" }, settings: { whatsappAutoSend: false } }));
             toast.success("تم مسح البيانات");
           }}>
             <Trash2 className="w-4 h-4 ml-1" /> مسح
