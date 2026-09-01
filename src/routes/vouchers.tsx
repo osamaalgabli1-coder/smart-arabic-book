@@ -12,7 +12,7 @@ import { Plus, Trash2, Pencil, MessageCircle } from "lucide-react";
 import {
   setState, useAppState, uid, formatCurrency, voucherTypeLabels,
   currencyLabels, currencySymbols, CURRENCIES, nextVoucherNumber,
-  type Voucher, type VoucherType, type Currency, getState,
+  type Voucher, type VoucherType, type Currency, getState, checkCreditLimit, formatCurrency as fc,
 } from "@/lib/store";
 import { buildVoucherMessage, sendWhatsapp, notifyClient } from "@/lib/whatsapp";
 import { toast } from "sonner";
@@ -50,6 +50,17 @@ function VouchersPage() {
     if (needsToClient && !form.toClientId) { toast.error("اختر العميل الثاني"); return; }
     const finalCurrency: Currency = needsCashbox && srcBox ? srcBox.currency : form.currency;
     const finalToAmount = form.type === "transfer" && isCrossCurrency ? (form.toAmount || form.amount) : (form.type === "transfer" ? form.amount : undefined);
+    // سقف المديونية: المعاملات التي تزيد مديونية العميل تتوقف عند بلوغ السقف
+    const debtorId = form.type === "compound" ? form.clientId : (["debit", "receipt"].includes(form.type) ? form.clientId : undefined);
+    if (debtorId) {
+      const added = form.amount + (form.type === "compound" ? (form.commission || 0) : 0);
+      const prev = isEdit ? (state.vouchers.find((x) => x.id === form.id)?.amount || 0) : 0;
+      const chk = checkCreditLimit(state, debtorId, finalCurrency, added - prev);
+      if (chk.blocked) {
+        toast.error(`تم إيقاف العملية: تجاوز سقف مديونية السيد (السقف ${fc(chk.limit, finalCurrency)} — بعد العملية ${fc(chk.after, finalCurrency)})`);
+        return;
+      }
+    }
     const record: Voucher = { ...form, currency: finalCurrency, toAmount: finalToAmount };
     if (!isEdit) {
       record.id = uid();
