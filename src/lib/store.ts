@@ -30,6 +30,16 @@ export type Client = {
   groupWebhook?: string; // أداة ربط تلقائي (CallMeBot / Webhook) — يدعم {message}
   waWebhook?: string; // ربط واتساب العميل — إرسال تلقائي مباشر ({message} و {phone})
   waApiKey?: string; // مفتاح CallMeBot للعميل (اختياري)
+  // سقف المديونية — عند بلوغه تتوقف العمليات على العميل (0 أو فارغ = بدون سقف)
+  creditLimit?: number;
+  creditLimitCurrency?: Currency;
+  // تصنيف العميل
+  categoryId?: string;
+};
+
+export type ClientCategory = {
+  id: string;
+  name: string;
 };
 
 export type Cashbox = {
