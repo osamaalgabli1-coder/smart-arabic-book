@@ -18,6 +18,7 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as ExportRouteImport } from './routes/export'
+import { Route as DevicesRouteImport } from './routes/devices'
 import { Route as CustomizeRouteImport } from './routes/customize'
 import { Route as CompanyRouteImport } from './routes/company'
 import { Route as ClientsRouteImport } from './routes/clients'
@@ -71,6 +72,11 @@ const ReportsRoute = ReportsRouteImport.update({
 const ExportRoute = ExportRouteImport.update({
   id: '/export',
   path: '/export',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DevicesRoute = DevicesRouteImport.update({
+  id: '/devices',
+  path: '/devices',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CustomizeRoute = CustomizeRouteImport.update({
@@ -128,6 +134,7 @@ export interface FileRoutesByFullPath {
   '/clients': typeof ClientsRoute
   '/company': typeof CompanyRoute
   '/customize': typeof CustomizeRoute
+  '/devices': typeof DevicesRoute
   '/export': typeof ExportRoute
   '/reports': typeof ReportsRoute
   '/search': typeof SearchRoute
@@ -148,6 +155,7 @@ export interface FileRoutesByTo {
   '/clients': typeof ClientsRoute
   '/company': typeof CompanyRoute
   '/customize': typeof CustomizeRoute
+  '/devices': typeof DevicesRoute
   '/export': typeof ExportRoute
   '/reports': typeof ReportsRoute
   '/search': typeof SearchRoute
@@ -169,6 +177,7 @@ export interface FileRoutesById {
   '/clients': typeof ClientsRoute
   '/company': typeof CompanyRoute
   '/customize': typeof CustomizeRoute
+  '/devices': typeof DevicesRoute
   '/export': typeof ExportRoute
   '/reports': typeof ReportsRoute
   '/search': typeof SearchRoute
@@ -191,6 +200,7 @@ export interface FileRouteTypes {
     | '/clients'
     | '/company'
     | '/customize'
+    | '/devices'
     | '/export'
     | '/reports'
     | '/search'
@@ -211,6 +221,7 @@ export interface FileRouteTypes {
     | '/clients'
     | '/company'
     | '/customize'
+    | '/devices'
     | '/export'
     | '/reports'
     | '/search'
@@ -231,6 +242,7 @@ export interface FileRouteTypes {
     | '/clients'
     | '/company'
     | '/customize'
+    | '/devices'
     | '/export'
     | '/reports'
     | '/search'
@@ -252,6 +264,7 @@ export interface RootRouteChildren {
   ClientsRoute: typeof ClientsRoute
   CompanyRoute: typeof CompanyRoute
   CustomizeRoute: typeof CustomizeRoute
+  DevicesRoute: typeof DevicesRoute
   ExportRoute: typeof ExportRoute
   ReportsRoute: typeof ReportsRoute
   SearchRoute: typeof SearchRoute
@@ -329,6 +342,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/devices': {
+      id: '/devices'
+      path: '/devices'
+      fullPath: '/devices'
+      preLoaderRoute: typeof DevicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/customize': {
       id: '/customize'
       path: '/customize'
@@ -404,6 +424,7 @@ const rootRouteChildren: RootRouteChildren = {
   ClientsRoute: ClientsRoute,
   CompanyRoute: CompanyRoute,
   CustomizeRoute: CustomizeRoute,
+  DevicesRoute: DevicesRoute,
   ExportRoute: ExportRoute,
   ReportsRoute: ReportsRoute,
   SearchRoute: SearchRoute,
