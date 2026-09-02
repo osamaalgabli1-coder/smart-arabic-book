@@ -189,6 +189,23 @@ export function getState() {
   return state;
 }
 
+// اشتراك خارجي بتغيّر الحالة (تستخدمه المزامنة بين الأجهزة)
+export function subscribe(cb: () => void): () => void {
+  listeners.add(cb);
+  return () => { listeners.delete(cb); };
+}
+
+// استبدال الحالة كاملة (قادمة من جهاز آخر) دون إعادة إرسالها
+export function replaceState(next: AppState, opts?: { silent?: boolean }) {
+  state = { ...initialState, ...next };
+  if (opts?.silent) {
+    save();
+    listeners.forEach((l) => l());
+  } else {
+    emit();
+  }
+}
+
 export function useAppState<T>(selector: (s: AppState) => T): T {
   return useSyncExternalStore(
     (cb) => {
