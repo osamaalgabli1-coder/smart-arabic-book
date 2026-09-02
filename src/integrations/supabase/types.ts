@@ -14,6 +14,118 @@ export type Database = {
   }
   public: {
     Tables: {
+      sync_devices: {
+        Row: {
+          created_at: string
+          device_id: string
+          id: string
+          is_owner: boolean
+          last_seen: string | null
+          name: string
+          platform: string
+          status: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_id: string
+          id?: string
+          is_owner?: boolean
+          last_seen?: string | null
+          name?: string
+          platform?: string
+          status?: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          device_id?: string
+          id?: string
+          is_owner?: boolean
+          last_seen?: string | null
+          name?: string
+          platform?: string
+          status?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sync_devices_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "sync_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sync_snapshots: {
+        Row: {
+          created_at: string
+          data: Json
+          updated_at: string
+          updated_by: string | null
+          version: number
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sync_snapshots_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: true
+            referencedRelation: "sync_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sync_workspaces: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          max_devices: number
+          name: string
+          owner_device_id: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          max_devices?: number
+          name?: string
+          owner_device_id: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          max_devices?: number
+          name?: string
+          owner_device_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       wa_config: {
         Row: {
           access_token: string | null

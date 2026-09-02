@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DescriptionField } from "@/components/DescriptionField";
 import { Plus, Trash2, Send, Pencil, MessageCircle } from "lucide-react";
-import { setState, useAppState, uid, formatCurrency, CURRENCIES, currencyLabels, currencySymbols, nextTransferNumber, getState, type Transfer, type Currency } from "@/lib/store";
+import { setState, useAppState, uid, formatCurrency, CURRENCIES, currencyLabels, currencySymbols, nextTransferNumber, getState, checkCreditLimit, type Transfer, type Currency } from "@/lib/store";
 import { buildTransferMessage, sendWhatsapp, notifyClient } from "@/lib/whatsapp";
 import { toast } from "sonner";
 
@@ -35,6 +35,16 @@ function TransfersPage() {
   const save = () => {
     if (!form.sender || !form.receiver) { toast.error("أدخل المرسل والمستلم"); return; }
     if (form.amount <= 0) { toast.error("أدخل مبلغاً"); return; }
+    // سقف المديونية: الحوالة الصادرة وعمولتها تزيد مديونية السيد
+    if (form.clientId && form.transferType === "صادرة") {
+      const added = form.amount + (form.outgoingFee || 0);
+      const prev = isEdit ? (() => { const o = state.transfers.find((x) => x.id === form.id); return o && o.transferType === "صادرة" ? o.amount + (o.outgoingFee || 0) : 0; })() : 0;
+      const chk = checkCreditLimit(state, form.clientId, form.currency, added - prev);
+      if (chk.blocked) {
+        toast.error(`تم إيقاف العملية: تجاوز سقف مديونية السيد (السقف ${formatCurrency(chk.limit, form.currency)} — بعد العملية ${formatCurrency(chk.after, form.currency)})`);
+        return;
+      }
+    }
     const record: Transfer = { ...form };
     if (!isEdit) {
       record.id = uid();

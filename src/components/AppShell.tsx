@@ -1,7 +1,8 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, Home, Users, Search, Tags, Wallet, FileText, Send, BarChart3, Settings, Upload, Building2, X, MessageCircle, Phone, HardDriveUpload, Lock, ArrowRight } from "lucide-react";
+import { Menu, Home, Users, Search, Tags, Wallet, FileText, Send, BarChart3, Settings, Upload, Building2, X, MessageCircle, Phone, HardDriveUpload, Lock, ArrowRight, Smartphone } from "lucide-react";
 import { useRouter } from "@tanstack/react-router";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { startSync, stopSync } from "@/lib/sync";
 import { useAppState } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { LockGate, lockApp } from "@/components/LockGate";
@@ -19,6 +20,7 @@ const menu = [
   { to: "/statement", label: "إدارة الحسابات", icon: FileText },
   { to: "/reports", label: "التقارير", icon: BarChart3 },
   { to: "/whatsapp", label: "إشعارات WhatsApp Business", icon: MessageCircle },
+  { to: "/devices", label: "الأجهزة والمزامنة", icon: Smartphone },
   { to: "/backup", label: "النسخ الاحتياطي والاستعادة", icon: Upload },
   { to: "/company", label: "إعدادات الشركة", icon: Building2 },
   { to: "/settings", label: "الإعدادات", icon: Settings },
@@ -28,6 +30,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const path = useRouterState({ select: (s) => s.location.pathname });
+  useEffect(() => { startSync(); return () => stopSync(); }, []);
   const router = useRouter();
   const isHome = path === "/";
   const company = useAppState((s) => s.company);
