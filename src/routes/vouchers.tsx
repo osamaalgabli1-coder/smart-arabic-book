@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,7 @@ const emptyForm = (): Voucher => ({
 function VouchersPage() {
   const state = useAppState((s) => s);
   const search = Route.useSearch();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<Voucher>(emptyForm());
   const isEdit = !!form.id;
