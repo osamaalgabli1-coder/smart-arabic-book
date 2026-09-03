@@ -46,7 +46,7 @@ function SettingsPage() {
             <MessageSquare className="w-5 h-5 text-primary mt-0.5" />
             <div>
               <div className="font-bold">إرسال الإشعارات عبر الرسائل النصية (SMS)</div>
-              <div className="text-xs text-muted-foreground">يفتح تطبيق الرسائل برقم العميل ونص الإشعار</div>
+              <div className="text-xs text-muted-foreground">يفتح تطبيق الرسائل برقم السيد ونص الإشعار</div>
             </div>
           </div>
           <Switch checked={sms} onCheckedChange={(v) => setState((s) => ({ ...s, settings: { ...s.settings, smsNotifications: v } }))} />

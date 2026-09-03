@@ -59,7 +59,7 @@ function renderClientBlock(client: Client, opts: { from?: string; to?: string })
       </table>
     </div>`;
   }
-  if (!html) html = `<div class="empty">لا توجد عمليات لهذا العميل</div>`;
+  if (!html) html = `<div class="empty">لا توجد عمليات لهذا السيد</div>`;
   return html;
 }
 
@@ -254,7 +254,7 @@ export async function openStatementPDFFile(clientIds: string[], opts: { from?: s
   setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
 
-// إنشاء ملف PDF ومشاركته مباشرة إلى واتساب رقم العميل (مع تنزيل احتياطي)
+// إنشاء ملف PDF ومشاركته مباشرة إلى واتساب رقم السيد (مع تنزيل احتياطي)
 export async function sendClientStatementToWhatsapp(clientId: string, opts: { from?: string; to?: string } = {}) {
   const s = getState();
   const client = s.clients.find((c) => c.id === clientId);

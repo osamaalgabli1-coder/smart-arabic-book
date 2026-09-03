@@ -70,7 +70,7 @@ function TransfersPage() {
 
   return (
     <AppShell>
-      <PageHeader title="الحوالات" subtitle="حوالات صادرة/واردة مرتبطة بحساب العميل" actions={
+      <PageHeader title="الحوالات" subtitle="حوالات صادرة/واردة مرتبطة بحساب السيد" actions={
         <Button onClick={openNew}><Plus className="w-4 h-4 ml-1" /> حوالة جديدة</Button>
       } />
 
@@ -117,7 +117,7 @@ function TransfersPage() {
           <DialogHeader><DialogTitle>{isEdit ? `تعديل الحوالة #${form.number}` : `حوالة جديدة #${form.number}`}</DialogTitle></DialogHeader>
           <div className="grid gap-3">
             <F label="رقم الحوالة"><Input value={form.number} onChange={(e) => setForm({ ...form, number: e.target.value })} /></F>
-            <F label="العميل المرتبط">
+            <F label="السيد المرتبط">
               <Select value={form.clientId ?? ""} onValueChange={(v) => setForm({ ...form, clientId: v })}>
                 <SelectTrigger><SelectValue placeholder="اختر عميل" /></SelectTrigger>
                 <SelectContent>{state.clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
@@ -127,8 +127,8 @@ function TransfersPage() {
               <Select value={form.transferType} onValueChange={(v) => setForm({ ...form, transferType: v as Transfer["transferType"] })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="صادرة">صادرة (على حساب العميل — عليه)</SelectItem>
-                  <SelectItem value="واردة">واردة (لحساب العميل — له)</SelectItem>
+                  <SelectItem value="صادرة">صادرة (على حساب السيد — عليه)</SelectItem>
+                  <SelectItem value="واردة">واردة (لحساب السيد — له)</SelectItem>
                   <SelectItem value="داخلية">داخلية</SelectItem>
                 </SelectContent>
               </Select>
@@ -143,8 +143,8 @@ function TransfersPage() {
             </F>
             <F label="المبلغ"><Input type="number" inputMode="decimal" placeholder="0" value={form.amount || ""} onChange={(e) => setForm({ ...form, amount: Number(e.target.value) || 0 })} /></F>
             <div className="grid grid-cols-2 gap-3">
-              <F label="عمولة صادرة (على حساب العميل — عليه)"><Input type="number" inputMode="decimal" placeholder="0" value={form.outgoingFee || ""} onChange={(e) => setForm({ ...form, outgoingFee: Number(e.target.value) || 0 })} /></F>
-              <F label="عمولة واردة (لحساب العميل — له)"><Input type="number" inputMode="decimal" placeholder="0" value={form.incomingFee || ""} onChange={(e) => setForm({ ...form, incomingFee: Number(e.target.value) || 0 })} /></F>
+              <F label="عمولة صادرة (على حساب السيد — عليه)"><Input type="number" inputMode="decimal" placeholder="0" value={form.outgoingFee || ""} onChange={(e) => setForm({ ...form, outgoingFee: Number(e.target.value) || 0 })} /></F>
+              <F label="عمولة واردة (لحساب السيد — له)"><Input type="number" inputMode="decimal" placeholder="0" value={form.incomingFee || ""} onChange={(e) => setForm({ ...form, incomingFee: Number(e.target.value) || 0 })} /></F>
             </div>
             <F label="التاريخ"><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></F>
             <F label="البيان"><DescriptionField value={form.description ?? ""} onChange={(v) => setForm({ ...form, description: v })} /></F>

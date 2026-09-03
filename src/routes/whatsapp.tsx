@@ -81,7 +81,7 @@ function WhatsappPage() {
     if (!c) { toast.error("اختر عميلاً"); return; }
     setBusy(true);
     const res = await sendWaBusinessMessage({ data: {
-      message: `رسالة تجريبية من نظام المحاسب المطور ✅\nالعميل: ${c.name}`,
+      message: `رسالة تجريبية من نظام المحاسب المطور ✅\nالسيد: ${c.name}`,
       phone: c.phone ?? "", clientId: c.id, clientName: c.name, kind: "test",
     } });
     if (res.ok) toast.success("تم الإرسال الفوري بنجاح"); else toast.error(res.error ?? "فشل الإرسال");
@@ -120,7 +120,7 @@ function WhatsappPage() {
           <p className="text-[11px] text-muted-foreground leading-relaxed">
             <ShieldCheck className="w-3 h-3 inline ml-1" />
             الرموز محفوظة في قاعدة بيانات مؤمّنة على الخادم ولا تظهر في المتصفح. ملاحظة: واجهة ميتا الرسمية لا تدعم الإرسال إلى مجموعات واتساب —
-            تُرسل الإشعارات إلى أرقام العملاء فوراً، وتبقى المجموعات عبر رابط/أداة الربط في بطاقة العميل.
+            تُرسل الإشعارات إلى أرقام العملاء فوراً، وتبقى المجموعات عبر رابط/أداة الربط في بطاقة السيد.
           </p>
         </section>
 

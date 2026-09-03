@@ -46,11 +46,11 @@ function VouchersPage() {
 
   const save = () => {
     if (form.amount <= 0) { toast.error("أدخل مبلغاً صحيحاً"); return; }
-    if (needsClient && !form.clientId) { toast.error("اختر العميل"); return; }
-    if (needsToClient && !form.toClientId) { toast.error("اختر العميل الثاني"); return; }
+    if (needsClient && !form.clientId) { toast.error("اختر السيد"); return; }
+    if (needsToClient && !form.toClientId) { toast.error("اختر السيد الثاني"); return; }
     const finalCurrency: Currency = needsCashbox && srcBox ? srcBox.currency : form.currency;
     const finalToAmount = form.type === "transfer" && isCrossCurrency ? (form.toAmount || form.amount) : (form.type === "transfer" ? form.amount : undefined);
-    // سقف المديونية: المعاملات التي تزيد مديونية العميل تتوقف عند بلوغ السقف
+    // سقف المديونية: المعاملات التي تزيد مديونية السيد تتوقف عند بلوغ السقف
     const debtorId = form.type === "compound" ? form.clientId : (["debit", "receipt"].includes(form.type) ? form.clientId : undefined);
     if (debtorId) {
       const added = form.amount + (form.type === "compound" ? (form.commission || 0) : 0);
@@ -121,7 +121,7 @@ function VouchersPage() {
                 </div>
                 <div className="text-sm mt-1 truncate">{v.description || "—"}</div>
                 <div className="text-xs text-muted-foreground">
-                  {client?.name && <>العميل: {client.name} </>}
+                  {client?.name && <>السيد: {client.name} </>}
                   {toClient?.name && <> ← {toClient.name} </>}
                   {cash?.name && <> · الصندوق: {cash.name}</>}
                 </div>
@@ -166,7 +166,7 @@ function VouchersPage() {
               <div className="grid gap-1.5"><Label>التاريخ</Label><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
             </div>
             {needsClient && (
-              <div className="grid gap-1.5"><Label>{needsToClient ? "من العميل (مدين)" : "العميل"}</Label>
+              <div className="grid gap-1.5"><Label>{needsToClient ? "من السيد (مدين)" : "السيد"}</Label>
                 <Select value={form.clientId} onValueChange={(v) => setForm({ ...form, clientId: v })}>
                   <SelectTrigger><SelectValue placeholder="اختر عميل" /></SelectTrigger>
                   <SelectContent>{state.clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
@@ -174,7 +174,7 @@ function VouchersPage() {
               </div>
             )}
             {needsToClient && (
-              <div className="grid gap-1.5"><Label>إلى العميل (دائن)</Label>
+              <div className="grid gap-1.5"><Label>إلى السيد (دائن)</Label>
                 <Select value={form.toClientId} onValueChange={(v) => setForm({ ...form, toClientId: v })}>
                   <SelectTrigger><SelectValue placeholder="اختر عميل" /></SelectTrigger>
                   <SelectContent>{state.clients.filter((c) => c.id !== form.clientId).map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>

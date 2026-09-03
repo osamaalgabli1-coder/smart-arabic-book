@@ -48,7 +48,7 @@ function StatementPage() {
       <PageHeader title="إدارة الحسابات" subtitle="كشف تفصيلي · تصدير PDF · مشاركة واتساب" />
       <div className="grid sm:grid-cols-3 gap-3 mb-4">
         <div className="grid gap-1.5">
-          <Label>العميل</Label>
+          <Label>السيد</Label>
           <Select value={clientId} onValueChange={setClientId}>
             <SelectTrigger><SelectValue placeholder="اختر عميل" /></SelectTrigger>
             <SelectContent>{state.clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
@@ -60,7 +60,7 @@ function StatementPage() {
 
       <div className="flex flex-wrap gap-2 mb-4">
         <Button disabled={!client} onClick={() => client && openStatementPDF([client.id], { from, to, title: `كشف حساب — ${client.name}` })}>
-          <FileDown className="w-4 h-4 ml-1" /> تصدير PDF (هذا العميل)
+          <FileDown className="w-4 h-4 ml-1" /> تصدير PDF (هذا السيد)
         </Button>
         <Button variant="outline" onClick={() => openStatementPDF(state.clients.map((c) => c.id), { from, to, title: "كشف حسابات كل العملاء" })}>
           <Users className="w-4 h-4 ml-1" /> تصدير PDF لكل العملاء
@@ -83,7 +83,7 @@ function StatementPage() {
       <section className="mb-5 border-2 border-border rounded-xl p-3">
         <h3 className="font-bold text-primary mb-2 text-sm">تصدير البيانات</h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          <MiniBtn icon={<User className="w-4 h-4" />} label="كشف تفصيلي — هذا العميل" onClick={() => {
+          <MiniBtn icon={<User className="w-4 h-4" />} label="كشف تفصيلي — هذا السيد" onClick={() => {
             if (!client) { toast.error("اختر عميلاً"); return; }
             openStatementPDF([client.id], { from, to, title: `كشف حساب — ${client.name}` });
           }} />
@@ -91,7 +91,7 @@ function StatementPage() {
             if (!state.clients.length) { toast.error("لا يوجد عملاء"); return; }
             openStatementPDF(state.clients.map((c) => c.id), { from, to, title: "كشف حسابات كل العملاء" });
           }} />
-          <MiniBtn icon={<Download className="w-4 h-4" />} label="تنزيل كشف هذا العميل" onClick={() => {
+          <MiniBtn icon={<Download className="w-4 h-4" />} label="تنزيل كشف هذا السيد" onClick={() => {
             if (!client) { toast.error("اختر عميلاً"); return; }
             downloadStatementHTML([client.id], { from, to, title: `كشف-حساب-${client.name}` });
             toast.success("تم التنزيل");

@@ -37,7 +37,7 @@ function ExportPage() {
         <h3 className="font-bold text-primary mb-3 text-sm">تصدير كشف الحساب PDF</h3>
         <div className="grid sm:grid-cols-2 gap-3 mb-3">
           <div className="grid gap-1.5">
-            <Label>اختر العميل</Label>
+            <Label>اختر السيد</Label>
             <Select value={clientId} onValueChange={setClientId}>
               <SelectTrigger><SelectValue placeholder="اختر عميل" /></SelectTrigger>
               <SelectContent>{state.clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
@@ -45,7 +45,7 @@ function ExportPage() {
           </div>
         </div>
         <div className="grid sm:grid-cols-2 gap-3">
-          <Btn icon={<User />} label="كشف تفصيلي — هذا العميل" onClick={() => {
+          <Btn icon={<User />} label="كشف تفصيلي — هذا السيد" onClick={() => {
             const c = state.clients.find((x) => x.id === clientId);
             if (!c) { toast.error("اختر عميلاً"); return; }
             openStatementPDF([c.id], { title: `كشف حساب — ${c.name}` });
@@ -54,7 +54,7 @@ function ExportPage() {
             if (state.clients.length === 0) { toast.error("لا يوجد عملاء"); return; }
             openStatementPDF(state.clients.map((c) => c.id), { title: "كشف حسابات كل العملاء" });
           }} />
-          <Btn icon={<Download />} label="تنزيل كشف هذا العميل (إلى التنزيلات)" onClick={() => {
+          <Btn icon={<Download />} label="تنزيل كشف هذا السيد (إلى التنزيلات)" onClick={() => {
             const c = state.clients.find((x) => x.id === clientId);
             if (!c) { toast.error("اختر عميلاً"); return; }
             downloadStatementHTML([c.id], { title: `كشف-حساب-${c.name}` });
@@ -72,7 +72,7 @@ function ExportPage() {
         <h3 className="font-bold text-primary mb-3 text-sm">تصدير إجمالي</h3>
         <div className="grid sm:grid-cols-2 gap-3 mb-3">
           <div className="grid gap-1.5">
-            <Label>اختر العميل لتصدير كشفه PDF</Label>
+            <Label>اختر السيد لتصدير كشفه PDF</Label>
             <Select value={clientId} onValueChange={setClientId}>
               <SelectTrigger><SelectValue placeholder="اختر عميل" /></SelectTrigger>
               <SelectContent>{state.clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
@@ -88,7 +88,7 @@ function ExportPage() {
             catch (e) { toast.error("تعذّر إنشاء PDF"); console.error(e); }
           }} />
           <Btn icon={<Share2 />} label="مشاركة عبر واتساب" onClick={shareWhatsapp} />
-          <Btn icon={<MessageCircle />} label="إرسال كشف العميل PDF إلى واتساب العميل" onClick={async () => {
+          <Btn icon={<MessageCircle />} label="إرسال كشف السيد PDF إلى واتساب السيد" onClick={async () => {
             const c = state.clients.find((x) => x.id === clientId);
             if (!c) { toast.error("اختر عميلاً"); return; }
             toast.info("جاري تجهيز الكشف...");

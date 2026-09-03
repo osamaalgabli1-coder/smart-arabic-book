@@ -96,9 +96,9 @@ function WhatsappLinkDialog({ client, onOpenChange }: { client: Client | null; o
   return (
     <Dialog open={Boolean(client)} onOpenChange={onOpenChange}>
       <DialogContent key={client?.id ?? "wa"}>
-        <DialogHeader><DialogTitle>ربط واتساب العميل وإرسال الإشعارات</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>ربط واتساب السيد وإرسال الإشعارات</DialogTitle></DialogHeader>
         <div className="grid gap-3">
-          <F label="رقم واتساب العميل">
+          <F label="رقم واتساب السيد">
             <Input dir="ltr" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="مثال: 771234567" />
           </F>
           <F label="مفتاح CallMeBot (إرسال تلقائي)">
@@ -108,7 +108,7 @@ function WhatsappLinkDialog({ client, onOpenChange }: { client: Client | null; o
             <Input dir="ltr" value={hook} onChange={(e) => setHook(e.target.value)} placeholder="https://example.com/send?to={phone}&text={message}" />
           </F>
           <p className="text-[11px] text-muted-foreground leading-5">
-            عند إدخال المفتاح أو الرابط تُرسَل كل الإشعارات تلقائياً إلى واتساب العميل بدون فتح واتساب.
+            عند إدخال المفتاح أو الرابط تُرسَل كل الإشعارات تلقائياً إلى واتساب السيد بدون فتح واتساب.
             استخدم <span dir="ltr">{"{message}"}</span> و <span dir="ltr">{"{phone}"}</span> داخل الرابط المخصص.
           </p>
           <div className="grid grid-cols-2 gap-2">
