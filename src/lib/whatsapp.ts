@@ -48,7 +48,7 @@ export function buildVoucherMessage(v: Voucher, role: "from" | "to" = "from"): s
   const lines = [
     `📄 *إشعار سند*`,
     `${company}`,
-    client ? `👤 العميل: ${client.name}` : "",
+    client ? `👤 السيد: ${client.name}` : "",
     `🧾 رقم السند: ${v.number}`,
     `📅 التاريخ: ${fmtDateTime(v.date)}`,
     `⚙️ نوع العملية: ${label}`,
@@ -71,7 +71,7 @@ export function buildTransferMessage(t: Transfer): string {
   const lines = [
     `📄 *إشعار حوالة*`,
     `${companyDisplayName(s)}`,
-    client ? `👤 العميل: ${client.name}` : "",
+    client ? `👤 السيد: ${client.name}` : "",
     `🧾 رقم الحوالة: ${t.number}`,
     `📅 التاريخ: ${fmtDateTime(t.date)}`,
     `⚙️ النوع: حوالة ${t.transferType}`,
@@ -103,8 +103,8 @@ export function sendWhatsapp(phone: string | undefined, message: string, opts?: 
   return true;
 }
 
-// ————— إرسال مباشر لواتساب العميل بدون فتح واتساب —————
-// يتطلب ربط العميل بأداة إرسال (Webhook / CallMeBot). يدعم {message} و {phone} داخل الرابط.
+// ————— إرسال مباشر لواتساب السيد بدون فتح واتساب —————
+// يتطلب ربط السيد بأداة إرسال (Webhook / CallMeBot). يدعم {message} و {phone} داخل الرابط.
 export async function sendDirectWhatsapp(
   client: { phone?: string; waWebhook?: string; waApiKey?: string } | undefined,
   message: string,
@@ -131,7 +131,7 @@ export async function sendDirectWhatsapp(
         body: JSON.stringify({ phone, to: phone, message, text: message }),
       });
     }
-    if (!opts?.silent) toast.success("تم إرسال الإشعار تلقائياً إلى واتساب العميل");
+    if (!opts?.silent) toast.success("تم إرسال الإشعار تلقائياً إلى واتساب السيد");
     return true;
   } catch {
     if (!opts?.silent) toast.error("تعذّر الإرسال التلقائي — تحقق من رابط الربط");
@@ -139,7 +139,7 @@ export async function sendDirectWhatsapp(
   }
 }
 
-// رسالة إجمالي رصيد العميل — مدين عليكم / دائن لكم
+// رسالة إجمالي رصيد السيد — مدين عليكم / دائن لكم
 export function buildBalanceMessage(clientId: string): string {
   const s = getState();
   const client = s.clients.find((c) => c.id === clientId);
@@ -156,7 +156,7 @@ export function buildBalanceMessage(clientId: string): string {
   const lines = [
     `📄 *${head}*`,
     `${companyDisplayName(s)}`,
-    client ? `👤 العميل: ${client.name}` : "",
+    client ? `👤 السيد: ${client.name}` : "",
     `📅 التاريخ: ${fmtDateTime(new Date().toISOString().slice(0, 10))}`,
     `📊 *إجمالي الرصيد:*`,
     parts.length ? parts.join("\n") : "• لا يوجد رصيد",
@@ -212,7 +212,7 @@ export async function sendToGroup(client: { groupInviteLink?: string; groupWebho
     }
   }
   const link = (client.groupInviteLink || "").trim();
-  if (!link) { toast.error("لم يتم ربط مجموعة واتساب لهذا العميل"); return false; }
+  if (!link) { toast.error("لم يتم ربط مجموعة واتساب لهذا السيد"); return false; }
   try { await navigator.clipboard.writeText(message); toast.success("تم نسخ الرسالة — الصقها في المجموعة"); } catch { /* ignore */ }
   window.open(link, "wa_group");
   return true;

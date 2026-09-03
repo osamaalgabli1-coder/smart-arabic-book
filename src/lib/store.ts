@@ -28,12 +28,12 @@ export type Client = {
   notifyGroup?: boolean;
   groupInviteLink?: string; // رابط دعوة/محادثة مجموعة واتساب
   groupWebhook?: string; // أداة ربط تلقائي (CallMeBot / Webhook) — يدعم {message}
-  waWebhook?: string; // ربط واتساب العميل — إرسال تلقائي مباشر ({message} و {phone})
+  waWebhook?: string; // ربط واتساب السيد — إرسال تلقائي مباشر ({message} و {phone})
   waApiKey?: string; // مفتاح CallMeBot للعميل (اختياري)
-  // سقف المديونية — عند بلوغه تتوقف العمليات على العميل (0 أو فارغ = بدون سقف)
+  // سقف المديونية — عند بلوغه تتوقف العمليات على السيد (0 أو فارغ = بدون سقف)
   creditLimit?: number;
   creditLimitCurrency?: Currency;
-  // تصنيف العميل
+  // تصنيف السيد
   categoryId?: string;
 };
 
@@ -54,7 +54,7 @@ export type Cashbox = {
 export type VoucherType =
   | "credit" // له
   | "debit" // عليه
-  | "receipt" // قبض من العميل إلى الصندوق
+  | "receipt" // قبض من السيد إلى الصندوق
   | "payment" // صرف من الصندوق للعميل
   | "transfer" // تحويل بين الصناديق
   | "adjustment" // قيد تسوية
@@ -71,7 +71,7 @@ export type Voucher = {
   description: string;
   amount: number;
   commission?: number; // عمولة اختيارية للقيد البسيط
-  commissionTo?: number; // عمولة تُضاف لحساب العميل الدائن (له)
+  commissionTo?: number; // عمولة تُضاف لحساب السيد الدائن (له)
   toAmount?: number; // للتحويل بين عملتين مختلفتين (المبلغ المستلم)
   exchangeRate?: number;
   currency: Currency;
@@ -81,7 +81,7 @@ export type Voucher = {
 export type Transfer = {
   id: string;
   number: string;
-  clientId?: string; // العميل المرتبط بالحوالة
+  clientId?: string; // السيد المرتبط بالحوالة
   sender: string;
   receiver: string;
   transferType: "صادرة" | "واردة" | "داخلية" | string;
@@ -244,7 +244,7 @@ export function clientBalances(state: AppState, clientId: string): Record<Curren
     const cur = t.currency;
     if (t.transferType === "واردة") out[cur] += t.amount;
     else if (t.transferType === "صادرة") out[cur] -= t.amount;
-    // العمولات: الصادرة على حساب العميل (عليه)، الواردة لحساب العميل (له)
+    // العمولات: الصادرة على حساب السيد (عليه)، الواردة لحساب السيد (له)
     if (t.outgoingFee) out[cur] -= t.outgoingFee;
     if (t.incomingFee) out[cur] += t.incomingFee;
   }
@@ -286,7 +286,7 @@ export function formatCurrency(n: number, currency: Currency = "YER"): string {
 }
 
 // عرض الرصيد وفق اتفاقية العرض للمستخدم:
-// - الرصيد على العميل (سالب داخلياً) يُعرض بدون علامة سالب
+// - الرصيد على السيد (سالب داخلياً) يُعرض بدون علامة سالب
 // - الرصيد للعميل (موجب داخلياً) يُعرض بعلامة سالب "-"
 export function formatBalanceDisplay(n: number, currency: Currency = "YER"): string {
   if (n === 0) return formatCurrency(0, currency);
@@ -320,7 +320,7 @@ export function sumClientsByCurrency(state: AppState): Record<Currency, number> 
 export const voucherTypeLabels: Record<VoucherType, string> = {
   credit: "دائن (له)",
   debit: "مدين (عليه)",
-  receipt: "قبض من العميل",
+  receipt: "قبض من السيد",
   payment: "صرف للعميل",
   transfer: "تحويل بين الصناديق",
   adjustment: "قيد تسوية",
@@ -420,7 +420,7 @@ export function nextTransferNumber(state: AppState): string {
 }
 
 // ---------- سقف المديونية ----------
-// الرصيد الداخلي السالب يعني "على العميل" (مديونية)
+// الرصيد الداخلي السالب يعني "على السيد" (مديونية)
 export function clientDebt(state: AppState, clientId: string, currency: Currency): number {
   const b = clientBalances(state, clientId);
   return Math.max(0, -(b[currency] || 0));
@@ -428,7 +428,7 @@ export function clientDebt(state: AppState, clientId: string, currency: Currency
 
 export type LimitCheck = { blocked: boolean; limit: number; debt: number; after: number };
 
-// يتحقق إن كانت العملية ستتجاوز سقف مديونية العميل
+// يتحقق إن كانت العملية ستتجاوز سقف مديونية السيد
 export function checkCreditLimit(
   state: AppState,
   clientId: string | undefined,

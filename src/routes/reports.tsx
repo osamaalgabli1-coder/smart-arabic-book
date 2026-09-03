@@ -38,7 +38,7 @@ function ReportsPage() {
             <Kpi k="أرباح العمولات" v={formatCurrency(commissionTotals[cur], cur)} highlight />
           </div>
           <Section title="أرصدة العملاء">
-            <Table headers={["العميل", "الهاتف", "الرصيد"]} rows={state.clients
+            <Table headers={["السيد", "الهاتف", "الرصيد"]} rows={state.clients
               .map((c) => ({ c, bal: clientBalances(state, c.id)[cur] }))
               .filter(({ bal }) => bal !== 0)
               .map(({ c, bal }) => [c.name, c.phone ?? "—", formatBalanceDisplay(bal, cur)])} />

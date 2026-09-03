@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,12 @@ import {
 import { buildVoucherMessage, sendWhatsapp, notifyClient } from "@/lib/whatsapp";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/vouchers")({ component: VouchersPage });
+export const Route = createFileRoute("/vouchers")({
+  component: VouchersPage,
+  validateSearch: (search: Record<string, unknown>): { new?: string } => ({
+    new: typeof search['new'] === "string" ? (search['new'] as string) : undefined,
+  }),
+});
 
 const emptyForm = (): Voucher => ({
   id: "", number: "", date: new Date().toISOString().slice(0, 10),
@@ -27,6 +32,8 @@ const emptyForm = (): Voucher => ({
 
 function VouchersPage() {
   const state = useAppState((s) => s);
+  const search = Route.useSearch();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<Voucher>(emptyForm());
   const isEdit = !!form.id;
@@ -44,13 +51,23 @@ function VouchersPage() {
   const openNew = () => { setForm({ ...emptyForm(), number: nextVoucherNumber(state) }); setOpen(true); };
   const openEdit = (v: Voucher) => { setForm({ ...v }); setOpen(true); };
 
+  // فتح نموذج مباشر من الشريط السفلي (دائن له / مدين عليه / قيد بسيط)
+  useEffect(() => {
+    const t = search.new;
+    if (!t) return;
+    setForm({ ...emptyForm(), number: nextVoucherNumber(getState()), type: t as Voucher["type"] });
+    setOpen(true);
+    void navigate({ to: "/vouchers", search: {}, replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search.new]);
+
   const save = () => {
     if (form.amount <= 0) { toast.error("أدخل مبلغاً صحيحاً"); return; }
-    if (needsClient && !form.clientId) { toast.error("اختر العميل"); return; }
-    if (needsToClient && !form.toClientId) { toast.error("اختر العميل الثاني"); return; }
+    if (needsClient && !form.clientId) { toast.error("اختر السيد"); return; }
+    if (needsToClient && !form.toClientId) { toast.error("اختر السيد الثاني"); return; }
     const finalCurrency: Currency = needsCashbox && srcBox ? srcBox.currency : form.currency;
     const finalToAmount = form.type === "transfer" && isCrossCurrency ? (form.toAmount || form.amount) : (form.type === "transfer" ? form.amount : undefined);
-    // سقف المديونية: المعاملات التي تزيد مديونية العميل تتوقف عند بلوغ السقف
+    // سقف المديونية: المعاملات التي تزيد مديونية السيد تتوقف عند بلوغ السقف
     const debtorId = form.type === "compound" ? form.clientId : (["debit", "receipt"].includes(form.type) ? form.clientId : undefined);
     if (debtorId) {
       const added = form.amount + (form.type === "compound" ? (form.commission || 0) : 0);
@@ -121,7 +138,7 @@ function VouchersPage() {
                 </div>
                 <div className="text-sm mt-1 truncate">{v.description || "—"}</div>
                 <div className="text-xs text-muted-foreground">
-                  {client?.name && <>العميل: {client.name} </>}
+                  {client?.name && <>السيد: {client.name} </>}
                   {toClient?.name && <> ← {toClient.name} </>}
                   {cash?.name && <> · الصندوق: {cash.name}</>}
                 </div>
@@ -166,7 +183,7 @@ function VouchersPage() {
               <div className="grid gap-1.5"><Label>التاريخ</Label><Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} /></div>
             </div>
             {needsClient && (
-              <div className="grid gap-1.5"><Label>{needsToClient ? "من العميل (مدين)" : "العميل"}</Label>
+              <div className="grid gap-1.5"><Label>{needsToClient ? "من السيد (مدين)" : "السيد"}</Label>
                 <Select value={form.clientId} onValueChange={(v) => setForm({ ...form, clientId: v })}>
                   <SelectTrigger><SelectValue placeholder="اختر عميل" /></SelectTrigger>
                   <SelectContent>{state.clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
@@ -174,7 +191,7 @@ function VouchersPage() {
               </div>
             )}
             {needsToClient && (
-              <div className="grid gap-1.5"><Label>إلى العميل (دائن)</Label>
+              <div className="grid gap-1.5"><Label>إلى السيد (دائن)</Label>
                 <Select value={form.toClientId} onValueChange={(v) => setForm({ ...form, toClientId: v })}>
                   <SelectTrigger><SelectValue placeholder="اختر عميل" /></SelectTrigger>
                   <SelectContent>{state.clients.filter((c) => c.id !== form.clientId).map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
