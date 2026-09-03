@@ -17,7 +17,12 @@ import {
 import { buildVoucherMessage, sendWhatsapp, notifyClient } from "@/lib/whatsapp";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/vouchers")({ component: VouchersPage });
+export const Route = createFileRoute("/vouchers")({
+  component: VouchersPage,
+  validateSearch: (search: Record<string, unknown>): { new?: string } => ({
+    new: typeof search['new'] === "string" ? (search['new'] as string) : undefined,
+  }),
+});
 
 const emptyForm = (): Voucher => ({
   id: "", number: "", date: new Date().toISOString().slice(0, 10),
@@ -27,6 +32,7 @@ const emptyForm = (): Voucher => ({
 
 function VouchersPage() {
   const state = useAppState((s) => s);
+  const search = Route.useSearch();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<Voucher>(emptyForm());
   const isEdit = !!form.id;
@@ -43,6 +49,16 @@ function VouchersPage() {
 
   const openNew = () => { setForm({ ...emptyForm(), number: nextVoucherNumber(state) }); setOpen(true); };
   const openEdit = (v: Voucher) => { setForm({ ...v }); setOpen(true); };
+
+  // فتح نموذج مباشر من الشريط السفلي (دائن له / مدين عليه / قيد بسيط)
+  useEffect(() => {
+    const t = search.new;
+    if (!t) return;
+    setForm({ ...emptyForm(), number: nextVoucherNumber(getState()), type: t as Voucher["type"] });
+    setOpen(true);
+    void navigate({ to: "/vouchers", search: {}, replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search.new]);
 
   const save = () => {
     if (form.amount <= 0) { toast.error("أدخل مبلغاً صحيحاً"); return; }
