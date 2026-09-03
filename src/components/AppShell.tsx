@@ -6,6 +6,7 @@ import { startSync, stopSync } from "@/lib/sync";
 import { useAppState } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { LockGate, lockApp } from "@/components/LockGate";
+import { BottomBar } from "@/components/BottomBar";
 import { googleDriveBackup } from "@/lib/gdrive";
 import { toast } from "sonner";
 
@@ -38,7 +39,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <LockGate>
-    <div className="min-h-screen bg-background text-foreground pb-24">
+    <div className="min-h-screen bg-background text-foreground pb-28">
       <header className="sticky top-0 z-30 bg-header text-header-foreground shadow-md">
         <div className="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-1">
@@ -180,6 +181,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </aside>
         </div>
       )}
+      <BottomBar />
     </div>
     </LockGate>
   );
