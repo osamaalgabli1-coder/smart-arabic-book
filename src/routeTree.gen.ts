@@ -9,104 +9,29 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WhatsappRouteImport } from './routes/whatsapp'
-import { Route as VouchersRouteImport } from './routes/vouchers'
-import { Route as TransfersRouteImport } from './routes/transfers'
-import { Route as StatementRouteImport } from './routes/statement'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as SearchRouteImport } from './routes/search'
-import { Route as ReportsRouteImport } from './routes/reports'
-import { Route as ExportRouteImport } from './routes/export'
-import { Route as DevicesRouteImport } from './routes/devices'
-import { Route as CustomizeRouteImport } from './routes/customize'
-import { Route as CompanyRouteImport } from './routes/company'
-import { Route as ClientsRouteImport } from './routes/clients'
-import { Route as CategoriesRouteImport } from './routes/categories'
-import { Route as CashboxesRouteImport } from './routes/cashboxes'
-import { Route as BuildAppRouteImport } from './routes/build-app'
-import { Route as BackupRouteImport } from './routes/backup'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BackupRouteImport } from './routes/backup'
+import { Route as BuildAppRouteImport } from './routes/build-app'
+import { Route as CashboxesRouteImport } from './routes/cashboxes'
+import { Route as CategoriesRouteImport } from './routes/categories'
+import { Route as ClientsRouteImport } from './routes/clients'
+import { Route as CompanyRouteImport } from './routes/company'
+import { Route as CustomizeRouteImport } from './routes/customize'
+import { Route as DevicesRouteImport } from './routes/devices'
+import { Route as ExportRouteImport } from './routes/export'
+import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as StatementRouteImport } from './routes/statement'
+import { Route as TransfersRouteImport } from './routes/transfers'
+import { Route as VouchersRouteImport } from './routes/vouchers'
+import { Route as WhatsappRouteImport } from './routes/whatsapp'
 import { Route as ApiPublicWhatsappRouteImport } from './routes/api/public/whatsapp'
 
-const WhatsappRoute = WhatsappRouteImport.update({
-  id: '/whatsapp',
-  path: '/whatsapp',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const VouchersRoute = VouchersRouteImport.update({
-  id: '/vouchers',
-  path: '/vouchers',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TransfersRoute = TransfersRouteImport.update({
-  id: '/transfers',
-  path: '/transfers',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StatementRoute = StatementRouteImport.update({
-  id: '/statement',
-  path: '/statement',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SearchRoute = SearchRouteImport.update({
-  id: '/search',
-  path: '/search',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ReportsRoute = ReportsRouteImport.update({
-  id: '/reports',
-  path: '/reports',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ExportRoute = ExportRouteImport.update({
-  id: '/export',
-  path: '/export',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DevicesRoute = DevicesRouteImport.update({
-  id: '/devices',
-  path: '/devices',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CustomizeRoute = CustomizeRouteImport.update({
-  id: '/customize',
-  path: '/customize',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CompanyRoute = CompanyRouteImport.update({
-  id: '/company',
-  path: '/company',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ClientsRoute = ClientsRouteImport.update({
-  id: '/clients',
-  path: '/clients',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CategoriesRoute = CategoriesRouteImport.update({
-  id: '/categories',
-  path: '/categories',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CashboxesRoute = CashboxesRouteImport.update({
-  id: '/cashboxes',
-  path: '/cashboxes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BuildAppRoute = BuildAppRouteImport.update({
-  id: '/build-app',
-  path: '/build-app',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BackupRoute = BackupRouteImport.update({
@@ -114,9 +39,84 @@ const BackupRoute = BackupRouteImport.update({
   path: '/backup',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const BuildAppRoute = BuildAppRouteImport.update({
+  id: '/build-app',
+  path: '/build-app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CashboxesRoute = CashboxesRouteImport.update({
+  id: '/cashboxes',
+  path: '/cashboxes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoriesRoute = CategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientsRoute = ClientsRouteImport.update({
+  id: '/clients',
+  path: '/clients',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompanyRoute = CompanyRouteImport.update({
+  id: '/company',
+  path: '/company',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomizeRoute = CustomizeRouteImport.update({
+  id: '/customize',
+  path: '/customize',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DevicesRoute = DevicesRouteImport.update({
+  id: '/devices',
+  path: '/devices',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExportRoute = ExportRouteImport.update({
+  id: '/export',
+  path: '/export',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StatementRoute = StatementRouteImport.update({
+  id: '/statement',
+  path: '/statement',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TransfersRoute = TransfersRouteImport.update({
+  id: '/transfers',
+  path: '/transfers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VouchersRoute = VouchersRouteImport.update({
+  id: '/vouchers',
+  path: '/vouchers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WhatsappRoute = WhatsappRouteImport.update({
+  id: '/whatsapp',
+  path: '/whatsapp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicWhatsappRoute = ApiPublicWhatsappRouteImport.update({
@@ -279,116 +279,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/whatsapp': {
-      id: '/whatsapp'
-      path: '/whatsapp'
-      fullPath: '/whatsapp'
-      preLoaderRoute: typeof WhatsappRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/vouchers': {
-      id: '/vouchers'
-      path: '/vouchers'
-      fullPath: '/vouchers'
-      preLoaderRoute: typeof VouchersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/transfers': {
-      id: '/transfers'
-      path: '/transfers'
-      fullPath: '/transfers'
-      preLoaderRoute: typeof TransfersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/statement': {
-      id: '/statement'
-      path: '/statement'
-      fullPath: '/statement'
-      preLoaderRoute: typeof StatementRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/search': {
-      id: '/search'
-      path: '/search'
-      fullPath: '/search'
-      preLoaderRoute: typeof SearchRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reports': {
-      id: '/reports'
-      path: '/reports'
-      fullPath: '/reports'
-      preLoaderRoute: typeof ReportsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/export': {
-      id: '/export'
-      path: '/export'
-      fullPath: '/export'
-      preLoaderRoute: typeof ExportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/devices': {
-      id: '/devices'
-      path: '/devices'
-      fullPath: '/devices'
-      preLoaderRoute: typeof DevicesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/customize': {
-      id: '/customize'
-      path: '/customize'
-      fullPath: '/customize'
-      preLoaderRoute: typeof CustomizeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/company': {
-      id: '/company'
-      path: '/company'
-      fullPath: '/company'
-      preLoaderRoute: typeof CompanyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/clients': {
-      id: '/clients'
-      path: '/clients'
-      fullPath: '/clients'
-      preLoaderRoute: typeof ClientsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/categories': {
-      id: '/categories'
-      path: '/categories'
-      fullPath: '/categories'
-      preLoaderRoute: typeof CategoriesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cashboxes': {
-      id: '/cashboxes'
-      path: '/cashboxes'
-      fullPath: '/cashboxes'
-      preLoaderRoute: typeof CashboxesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/build-app': {
-      id: '/build-app'
-      path: '/build-app'
-      fullPath: '/build-app'
-      preLoaderRoute: typeof BuildAppRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/backup': {
@@ -398,11 +293,116 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BackupRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/build-app': {
+      id: '/build-app'
+      path: '/build-app'
+      fullPath: '/build-app'
+      preLoaderRoute: typeof BuildAppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cashboxes': {
+      id: '/cashboxes'
+      path: '/cashboxes'
+      fullPath: '/cashboxes'
+      preLoaderRoute: typeof CashboxesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/categories': {
+      id: '/categories'
+      path: '/categories'
+      fullPath: '/categories'
+      preLoaderRoute: typeof CategoriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clients': {
+      id: '/clients'
+      path: '/clients'
+      fullPath: '/clients'
+      preLoaderRoute: typeof ClientsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/company': {
+      id: '/company'
+      path: '/company'
+      fullPath: '/company'
+      preLoaderRoute: typeof CompanyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customize': {
+      id: '/customize'
+      path: '/customize'
+      fullPath: '/customize'
+      preLoaderRoute: typeof CustomizeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/devices': {
+      id: '/devices'
+      path: '/devices'
+      fullPath: '/devices'
+      preLoaderRoute: typeof DevicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/export': {
+      id: '/export'
+      path: '/export'
+      fullPath: '/export'
+      preLoaderRoute: typeof ExportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/statement': {
+      id: '/statement'
+      path: '/statement'
+      fullPath: '/statement'
+      preLoaderRoute: typeof StatementRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/transfers': {
+      id: '/transfers'
+      path: '/transfers'
+      fullPath: '/transfers'
+      preLoaderRoute: typeof TransfersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vouchers': {
+      id: '/vouchers'
+      path: '/vouchers'
+      fullPath: '/vouchers'
+      preLoaderRoute: typeof VouchersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/whatsapp': {
+      id: '/whatsapp'
+      path: '/whatsapp'
+      fullPath: '/whatsapp'
+      preLoaderRoute: typeof WhatsappRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/whatsapp': {
