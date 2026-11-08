@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      notification_relay_attempts: {
+        Row: {
+          created_at: string
+          error: string | null
+          event_id: string
+          http_status: number | null
+          id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          event_id: string
+          http_status?: number | null
+          id?: string
+          status: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          event_id?: string
+          http_status?: number | null
+          id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notification_relay_settings: {
+        Row: {
+          auth_header: string
+          enabled: boolean
+          encrypted_api_key: string
+          updated_at: string
+          url: string
+          user_id: string
+        }
+        Insert: {
+          auth_header?: string
+          enabled?: boolean
+          encrypted_api_key: string
+          updated_at?: string
+          url: string
+          user_id: string
+        }
+        Update: {
+          auth_header?: string
+          enabled?: boolean
+          encrypted_api_key?: string
+          updated_at?: string
+          url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       sync_devices: {
         Row: {
           created_at: string
