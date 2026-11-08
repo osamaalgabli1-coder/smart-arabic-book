@@ -111,6 +111,7 @@ export type Company = {
 };
 
 export type AppSettings = {
+  notificationRelayEnabled?: boolean;
   whatsappAutoSend: boolean;
   smsNotifications?: boolean;
   telegramBotToken?: string;
