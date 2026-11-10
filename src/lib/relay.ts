@@ -16,7 +16,13 @@ function recipient(c: Client | undefined, cur: Currency, message: string, role?:
 }
 
 // يُرسل بعد نجاح الحفظ فقط؛ أي فشل لا يمس الحسابات أو العمليات
-async function dispatch(payload: Parameters<typeof sendRelayEvent>[0]["data"]) {
+type RelayPayload = {
+  eventId: string; action: "created" | "updated"; kind: string;
+  company: { name: string; phone?: string };
+  operation: { number?: string; typeLabel?: string; amount?: number; currency?: string; date?: string; description?: string };
+  recipients: { clientId: string; clientName: string; phone?: string; role?: string; balance?: number; balanceLabel?: string; message: string }[];
+};
+async function dispatch(payload: RelayPayload) {
   try {
     if (!getState().settings.notificationRelayEnabled) return;
     const { data } = await supabase.auth.getSession();
