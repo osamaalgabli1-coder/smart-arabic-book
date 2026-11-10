@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
-import { Moon, Sun, Trash2, MessageCircle, MessageSquare, Lock, Send } from "lucide-react";
+import { Moon, Sun, Trash2, MessageCircle, MessageSquare, Lock, Send, BellRing } from "lucide-react";
 import { setState, useAppState, defaultCategories } from "@/lib/store";
 import { toast } from "sonner";
 
@@ -30,6 +30,13 @@ function SettingsPage() {
     <AppShell>
       <PageHeader title="الإعدادات" subtitle="تخصيص التطبيق" />
       <div className="grid gap-3 max-w-lg">
+        <Link to="/notification-relay" className="bg-card border-2 border-primary/40 rounded-xl p-4 flex items-start gap-3 hover:bg-muted">
+          <BellRing className="w-5 h-5 text-primary mt-0.5" />
+          <div>
+            <div className="font-bold">ربط تطبيق الإشعارات</div>
+            <div className="text-xs text-muted-foreground">الرابط ومفتاح الربط، اختبار الاتصال، الحفظ والفصل</div>
+          </div>
+        </Link>
         <div className="bg-card border-2 border-border rounded-xl p-4 flex items-center justify-between">
           <div className="flex items-start gap-3">
             <MessageCircle className="w-5 h-5 text-success mt-0.5" />

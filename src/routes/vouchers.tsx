@@ -15,6 +15,7 @@ import {
   type Voucher, type VoucherType, type Currency, getState, checkCreditLimit, formatCurrency as fc,
 } from "@/lib/store";
 import { buildVoucherMessage, sendWhatsapp, notifyClient } from "@/lib/whatsapp";
+import { relayVoucher } from "@/lib/relay";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/vouchers")({
@@ -89,6 +90,7 @@ function VouchersPage() {
       toast.success(`تم تحديث السند #${record.number}`);
     }
     setOpen(false);
+    relayVoucher(record, isEdit ? "updated" : "created");
     // auto-send whatsapp
     if (needsClient) {
       const client = getState().clients.find((c) => c.id === record.clientId);
