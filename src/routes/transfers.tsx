@@ -11,6 +11,7 @@ import { DescriptionField } from "@/components/DescriptionField";
 import { Plus, Trash2, Send, Pencil, MessageCircle } from "lucide-react";
 import { setState, useAppState, uid, formatCurrency, CURRENCIES, currencyLabels, currencySymbols, nextTransferNumber, getState, checkCreditLimit, type Transfer, type Currency } from "@/lib/store";
 import { buildTransferMessage, sendWhatsapp, notifyClient } from "@/lib/whatsapp";
+import { relayTransfer } from "@/lib/relay";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/transfers")({ component: TransfersPage });
@@ -56,6 +57,7 @@ function TransfersPage() {
       toast.success(`تم تحديث الحوالة #${record.number}`);
     }
     setOpen(false);
+    relayTransfer(record, isEdit ? "updated" : "created");
     if (record.clientId) {
       const client = getState().clients.find((c) => c.id === record.clientId);
       notifyClient(client, buildTransferMessage(record));

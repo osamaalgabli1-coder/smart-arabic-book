@@ -19,6 +19,7 @@ import { Route as CompanyRouteImport } from './routes/company'
 import { Route as CustomizeRouteImport } from './routes/customize'
 import { Route as DevicesRouteImport } from './routes/devices'
 import { Route as ExportRouteImport } from './routes/export'
+import { Route as NotificationRelayRouteImport } from './routes/notification-relay'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as SettingsRouteImport } from './routes/settings'
@@ -79,6 +80,11 @@ const ExportRoute = ExportRouteImport.update({
   path: '/export',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NotificationRelayRoute = NotificationRelayRouteImport.update({
+  id: '/notification-relay',
+  path: '/notification-relay',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReportsRoute = ReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
@@ -136,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/customize': typeof CustomizeRoute
   '/devices': typeof DevicesRoute
   '/export': typeof ExportRoute
+  '/notification-relay': typeof NotificationRelayRoute
   '/reports': typeof ReportsRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
@@ -157,6 +164,7 @@ export interface FileRoutesByTo {
   '/customize': typeof CustomizeRoute
   '/devices': typeof DevicesRoute
   '/export': typeof ExportRoute
+  '/notification-relay': typeof NotificationRelayRoute
   '/reports': typeof ReportsRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
@@ -179,6 +187,7 @@ export interface FileRoutesById {
   '/customize': typeof CustomizeRoute
   '/devices': typeof DevicesRoute
   '/export': typeof ExportRoute
+  '/notification-relay': typeof NotificationRelayRoute
   '/reports': typeof ReportsRoute
   '/search': typeof SearchRoute
   '/settings': typeof SettingsRoute
@@ -202,6 +211,7 @@ export interface FileRouteTypes {
     | '/customize'
     | '/devices'
     | '/export'
+    | '/notification-relay'
     | '/reports'
     | '/search'
     | '/settings'
@@ -223,6 +233,7 @@ export interface FileRouteTypes {
     | '/customize'
     | '/devices'
     | '/export'
+    | '/notification-relay'
     | '/reports'
     | '/search'
     | '/settings'
@@ -244,6 +255,7 @@ export interface FileRouteTypes {
     | '/customize'
     | '/devices'
     | '/export'
+    | '/notification-relay'
     | '/reports'
     | '/search'
     | '/settings'
@@ -266,6 +278,7 @@ export interface RootRouteChildren {
   CustomizeRoute: typeof CustomizeRoute
   DevicesRoute: typeof DevicesRoute
   ExportRoute: typeof ExportRoute
+  NotificationRelayRoute: typeof NotificationRelayRoute
   ReportsRoute: typeof ReportsRoute
   SearchRoute: typeof SearchRoute
   SettingsRoute: typeof SettingsRoute
@@ -349,6 +362,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/notification-relay': {
+      id: '/notification-relay'
+      path: '/notification-relay'
+      fullPath: '/notification-relay'
+      preLoaderRoute: typeof NotificationRelayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reports': {
       id: '/reports'
       path: '/reports'
@@ -426,6 +446,7 @@ const rootRouteChildren: RootRouteChildren = {
   CustomizeRoute: CustomizeRoute,
   DevicesRoute: DevicesRoute,
   ExportRoute: ExportRoute,
+  NotificationRelayRoute: NotificationRelayRoute,
   ReportsRoute: ReportsRoute,
   SearchRoute: SearchRoute,
   SettingsRoute: SettingsRoute,

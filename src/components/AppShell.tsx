@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, Home, Users, Search, Tags, Wallet, FileText, Send, BarChart3, Settings, Upload, Building2, X, MessageCircle, Phone, HardDriveUpload, Lock, ArrowRight, Smartphone } from "lucide-react";
+import { Menu, Home, Users, Search, Tags, Wallet, FileText, Send, BarChart3, Settings, Upload, Building2, X, MessageCircle, Phone, HardDriveUpload, Lock, ArrowRight, Smartphone, BellRing } from "lucide-react";
 import { useRouter } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { startSync, stopSync } from "@/lib/sync";
@@ -21,6 +21,7 @@ const menu = [
   { to: "/statement", label: "إدارة الحسابات", icon: FileText },
   { to: "/reports", label: "التقارير", icon: BarChart3 },
   { to: "/whatsapp", label: "إشعارات WhatsApp Business", icon: MessageCircle },
+  { to: "/notification-relay", label: "ربط تطبيق الإشعارات", icon: BellRing },
   { to: "/devices", label: "الأجهزة والمزامنة", icon: Smartphone },
   { to: "/backup", label: "النسخ الاحتياطي والاستعادة", icon: Upload },
   { to: "/company", label: "إعدادات الشركة", icon: Building2 },

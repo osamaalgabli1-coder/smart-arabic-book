@@ -11,6 +11,7 @@ import { Plus, Pencil, Trash2, Phone, Contact, MessageCircle, Users, MessageSqua
 import { Switch } from "@/components/ui/switch";
 import { setState, useAppState, uid, clientBalance, formatCurrency, categoryName, CURRENCIES, currencyLabels, type Client, type Currency } from "@/lib/store";
 import { buildBalanceMessage, sendWhatsapp, maybeSendSMS, sendDirectWhatsapp } from "@/lib/whatsapp";
+import { relayClient } from "@/lib/relay";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/clients")({ component: ClientsPage });
@@ -256,10 +257,12 @@ function ClientDialog({ open, onOpenChange, initial }: { open: boolean; onOpenCh
 
           <Button onClick={() => {
             if (!form.name.trim()) return;
+            const saved = { ...form, id: initial?.id ?? uid() };
             setState((s) => {
-              if (initial) return { ...s, clients: s.clients.map((c) => c.id === initial.id ? { ...form, id: initial.id } : c) };
-              return { ...s, clients: [...s.clients, { ...form, id: uid() }] };
+              if (initial) return { ...s, clients: s.clients.map((c) => c.id === initial.id ? saved : c) };
+              return { ...s, clients: [...s.clients, saved] };
             });
+            relayClient(saved, initial ? "updated" : "created");
             onOpenChange(false);
           }}>حفظ</Button>
         </div>
